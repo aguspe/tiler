@@ -1,0 +1,23 @@
+<% content_for :title, "Data Sources" %>
+<div class="tiler-page-header">
+  <h1>Data Sources</h1>
+  <%= link_to "New Data Source", new_data_source_path, class: "tiler-btn tiler-btn-primary" %>
+</div>
+<% if @data_sources.empty? %>
+  <div class="tiler-empty"><p>No data sources yet.</p></div>
+<% else %>
+  <table class="tiler-table">
+    <thead><tr><th>Name</th><th>Slug</th><th>Records</th><th>Active</th><th></th></tr></thead>
+    <tbody>
+      <% @data_sources.each do |s| %>
+        <tr>
+          <td><%= link_to s.name, data_source_path(s) %></td>
+          <td><code><%= s.slug %></code></td>
+          <td><%= s.data_records.count %></td>
+          <td><%= s.active ? "✓" : "—" %></td>
+          <td><%= link_to "Edit", edit_data_source_path(s) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

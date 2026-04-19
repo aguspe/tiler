@@ -1,0 +1,32 @@
+<%= form_with(model: dashboard, url: dashboard.persisted? ? dashboard_path(dashboard) : dashboards_path,
+              local: true, class: "tiler-form") do |f| %>
+  <% if dashboard.errors.any? %>
+    <div class="tiler-form-errors">
+      <ul>
+        <% dashboard.errors.full_messages.each do |m| %><li><%= m %></li><% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="tiler-field">
+    <%= f.label :name %>
+    <%= f.text_field :name, required: true %>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :slug %>
+    <%= f.text_field :slug, placeholder: "auto-generated from name" %>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :description %>
+    <%= f.text_area :description, rows: 3 %>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :refresh_seconds, "Auto-refresh" %>
+    <%= f.select :refresh_seconds, Tiler::Dashboard::REFRESH_OPTIONS.invert %>
+  </div>
+
+  <%= f.submit class: "tiler-btn tiler-btn-primary" %>
+<% end %>

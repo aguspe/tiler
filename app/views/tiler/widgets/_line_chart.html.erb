@@ -1,0 +1,12 @@
+<canvas id="tiler-chart-<%= panel.id %>" height="220"></canvas>
+<script>
+  (function() {
+    const ctx = document.getElementById("tiler-chart-<%= panel.id %>");
+    if (!ctx || !window.Chart) return;
+    new Chart(ctx, {
+      type: "line",
+      data: { labels: <%= raw data[:labels].to_json %>, datasets: <%= raw data[:datasets].to_json %> },
+      options: Object.assign({ responsive: true, maintainAspectRatio: false }, <%= raw data[:options].to_json %>)
+    });
+  })();
+</script>

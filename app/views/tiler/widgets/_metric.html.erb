@@ -1,0 +1,7 @@
+<div class="tiler-metric">
+  <div class="tiler-metric-value"><%= data[:value].is_a?(Numeric) ? number_with_delimiter(data[:value]) : (data[:value] || "—") %></div>
+  <div class="tiler-metric-label"><%= data[:label] %></div>
+  <% if data[:time_window].present? && data[:time_window] != "all" %>
+    <div class="tiler-metric-window">last <%= data[:time_window] %></div>
+  <% end %>
+</div>

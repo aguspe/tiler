@@ -1,0 +1,13 @@
+<div class="tiler-status-grid">
+  <% data[:rows].each do |row| %>
+    <div class="tiler-status-tile tiler-status-<%= row[:status] %>">
+      <div class="tiler-status-name"><%= row[:name] %></div>
+      <div class="tiler-status-counts">
+        <span class="tiler-pass"><%= row[:pass] %>✓</span>
+        <span class="tiler-warn"><%= row[:warn] %>!</span>
+        <span class="tiler-fail"><%= row[:fail] %>✗</span>
+      </div>
+      <div class="tiler-status-last"><%= row[:last_run] %></div>
+    </div>
+  <% end %>
+</div>

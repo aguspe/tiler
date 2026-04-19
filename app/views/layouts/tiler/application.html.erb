@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= content_for?(:title) ? yield(:title) : "Tiler" %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "tiler/application", media: "all" %>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <%= yield :head %>
+</head>
+<body>
+  <nav class="tiler-nav">
+    <%= link_to "Dashboards", dashboards_path, class: "tiler-nav-link" %>
+    <%= link_to "Data Sources", data_sources_path, class: "tiler-nav-link" %>
+  </nav>
+  <% flash.each do |k, msg| %>
+    <div class="tiler-flash tiler-flash-<%= k %>"><%= msg %></div>
+  <% end %>
+  <main class="tiler-main"><%= yield %></main>
+</body>
+</html>

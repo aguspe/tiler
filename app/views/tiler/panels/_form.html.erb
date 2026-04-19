@@ -1,0 +1,43 @@
+<%= form_with(model: panel,
+              url: panel.persisted? ? dashboard_panel_path(@dashboard, panel) : dashboard_panels_path(@dashboard),
+              local: true, class: "tiler-form") do |f| %>
+  <% if panel.errors.any? %>
+    <div class="tiler-form-errors">
+      <ul><% panel.errors.full_messages.each do |m| %><li><%= m %></li><% end %></ul>
+    </div>
+  <% end %>
+
+  <div class="tiler-field">
+    <%= f.label :title %>
+    <%= f.text_field :title, required: true %>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :widget_type %>
+    <%= f.select :widget_type, widget_type_options %>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :tiler_data_source_id, "Data source" %>
+    <%= f.select :tiler_data_source_id,
+                 @data_sources.map { |s| [ s.name, s.id ] },
+                 include_blank: "— none —" %>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :col_span, "Width" %>
+    <%= f.select :col_span, { "Half" => 1, "Full" => 2 } %>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :config, "Config (JSON)" %>
+    <%= f.text_area :config, rows: 8, placeholder: '{"aggregation":"count","time_window":"7d"}' %>
+    <p class="tiler-hint">
+      Examples:
+      metric → <code>{"aggregation":"count","time_window":"24h"}</code>
+      line_chart → <code>{"value_column":"duration","aggregation":"avg","bucket":"day","time_window":"7d"}</code>
+    </p>
+  </div>
+
+  <%= f.submit class: "tiler-btn tiler-btn-primary" %>
+<% end %>

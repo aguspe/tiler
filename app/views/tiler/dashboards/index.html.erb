@@ -1,0 +1,22 @@
+<% content_for :title, "Dashboards" %>
+<div class="tiler-page-header">
+  <h1>Dashboards</h1>
+  <%= link_to "New Dashboard", new_dashboard_path, class: "tiler-btn tiler-btn-primary" %>
+</div>
+
+<% if @dashboards.empty? %>
+  <div class="tiler-empty">
+    <p>No dashboards yet.</p>
+    <%= link_to "Create your first dashboard", new_dashboard_path, class: "tiler-btn" %>
+  </div>
+<% else %>
+  <ul class="tiler-card-grid">
+    <% @dashboards.each do |d| %>
+      <li class="tiler-card">
+        <h3><%= link_to d.name, dashboard_path(d) %></h3>
+        <p class="tiler-muted"><%= d.description %></p>
+        <p class="tiler-meta"><%= pluralize(d.panels.size, "panel") %></p>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

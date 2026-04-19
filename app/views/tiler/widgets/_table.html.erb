@@ -1,0 +1,15 @@
+<% if data[:rows].empty? %>
+  <p class="tiler-muted">No records.</p>
+<% else %>
+  <table class="tiler-table">
+    <thead><tr><% data[:columns].each do |c| %><th><%= c.to_s.humanize %></th><% end %></tr></thead>
+    <tbody>
+      <% data[:rows].each do |row| %>
+        <tr><% row.each do |cell| %><td><%= cell %></td><% end %></tr>
+      <% end %>
+    </tbody>
+  </table>
+  <p class="tiler-muted tiler-table-footer">
+    Showing <%= data[:rows].size %> of <%= number_with_delimiter(data[:total]) %>.
+  </p>
+<% end %>

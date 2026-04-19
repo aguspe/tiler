@@ -1,0 +1,6 @@
+<% content_for :title, "Edit Data Source" %>
+<h1>Edit Data Source</h1>
+<%= render "form", data_source: @data_source %>
+<%= button_to "Delete", data_source_path(@data_source), method: :delete,
+              class: "tiler-btn tiler-btn-danger",
+              data: { turbo_confirm: "Delete source and all records?" } %>

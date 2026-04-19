@@ -1,0 +1,34 @@
+<% content_for :title, @data_source.name %>
+<div class="tiler-page-header">
+  <h1><%= @data_source.name %></h1>
+  <%= link_to "Edit", edit_data_source_path(@data_source), class: "tiler-btn" %>
+</div>
+
+<dl class="tiler-kv">
+  <dt>Slug</dt><dd><code><%= @data_source.slug %></code></dd>
+  <dt>Ingestion</dt><dd><%= @data_source.parsed_ingestion_methods.join(", ") %></dd>
+  <% if @data_source.webhook_enabled? %>
+    <dt>Webhook URL</dt>
+    <dd><code>POST <%= ingest_url(source_slug: @data_source.slug) %></code></dd>
+    <dt>Token header</dt>
+    <dd><code><%= Tiler.configuration.webhook_token_header %>: <%= @data_source.webhook_token %></code></dd>
+  <% end %>
+</dl>
+
+<h3>Recent records</h3>
+<% if @recent.empty? %>
+  <p class="tiler-muted">No records yet.</p>
+<% else %>
+  <table class="tiler-table">
+    <thead><tr><th>Recorded at</th><th>Via</th><th>Payload</th></tr></thead>
+    <tbody>
+      <% @recent.each do |r| %>
+        <tr>
+          <td><%= r.recorded_at.strftime("%Y-%m-%d %H:%M") %></td>
+          <td><%= r.ingested_via %></td>
+          <td><code><%= r.payload.truncate(120) %></code></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

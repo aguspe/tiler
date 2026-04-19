@@ -1,0 +1,52 @@
+<% content_for :title, @dashboard.name %>
+
+<div class="tiler-page-header">
+  <div>
+    <h1><%= @dashboard.name %></h1>
+    <% if @dashboard.description.present? %>
+      <p class="tiler-muted"><%= @dashboard.description %></p>
+    <% end %>
+  </div>
+  <div>
+    <%= link_to "Add Panel", new_dashboard_panel_path(@dashboard), class: "tiler-btn" %>
+    <%= link_to "Edit", edit_dashboard_path(@dashboard), class: "tiler-btn" %>
+  </div>
+</div>
+
+<% panels = @dashboard.panels %>
+
+<% if panels.empty? %>
+  <div class="tiler-empty">
+    <p>No panels yet.</p>
+    <%= link_to "Add your first panel", new_dashboard_panel_path(@dashboard), class: "tiler-btn tiler-btn-primary" %>
+  </div>
+<% else %>
+  <div class="tiler-grid"
+       <% if @dashboard.refresh_seconds > 0 %>
+         data-tiler-refresh="<%= @dashboard.refresh_seconds %>"
+       <% end %>>
+    <% panels.each do |panel| %>
+      <div class="tiler-cell tiler-cell-span-<%= panel.col_span %>">
+        <%= turbo_frame_tag "tiler_panel_#{panel.id}",
+              src: preview_dashboard_panel_path(@dashboard, panel),
+              loading: :lazy do %>
+          <div class="tiler-skeleton">
+            <div class="tiler-skeleton-title"></div>
+            <div class="tiler-skeleton-body"></div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  <script>
+    (function() {
+      const grid = document.querySelector('[data-tiler-refresh]');
+      if (!grid) return;
+      const interval = parseInt(grid.dataset.tilerRefresh, 10) * 1000;
+      if (!interval) return;
+      setInterval(function() {
+        grid.querySelectorAll('turbo-frame').forEach(function(f) { f.reload(); });
+      }, interval);
+    })();
+  </script>
+<% end %>

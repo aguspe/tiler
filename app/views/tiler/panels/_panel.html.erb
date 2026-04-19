@@ -1,0 +1,18 @@
+<%= turbo_frame_tag "tiler_panel_#{panel.id}" do %>
+  <div class="tiler-panel">
+    <div class="tiler-panel-header">
+      <h3><%= panel.title %></h3>
+      <div class="tiler-panel-actions">
+        <span class="tiler-tag"><%= panel.widget_label %></span>
+        <%= link_to "Edit", edit_dashboard_panel_path(panel.dashboard, panel), class: "tiler-link" %>
+      </div>
+    </div>
+    <div class="tiler-panel-body">
+      <% if data.nil? %>
+        <p class="tiler-muted">No data source configured.</p>
+      <% else %>
+        <%= render partial: panel.widget.partial, locals: { panel: panel, data: data } %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,28 @@
+<%= form_with(model: data_source,
+              url: data_source.persisted? ? data_source_path(data_source) : data_sources_path,
+              local: true, class: "tiler-form") do |f| %>
+  <% if data_source.errors.any? %>
+    <div class="tiler-form-errors">
+      <ul><% data_source.errors.full_messages.each do |m| %><li><%= m %></li><% end %></ul>
+    </div>
+  <% end %>
+
+  <div class="tiler-field"><%= f.label :name %><%= f.text_field :name, required: true %></div>
+  <div class="tiler-field"><%= f.label :slug %><%= f.text_field :slug, placeholder: "auto-generated" %></div>
+  <div class="tiler-field"><%= f.label :description %><%= f.text_area :description, rows: 2 %></div>
+  <div class="tiler-field"><%= f.check_box :active %><%= f.label :active, "Active" %></div>
+
+  <div class="tiler-field">
+    <%= f.label :schema_definition, "Schema (JSON array)" %>
+    <%= f.text_area :schema_definition, rows: 6,
+                    placeholder: '[{"key":"status","type":"string"},{"key":"duration","type":"float"}]' %>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :ingestion_methods, "Ingestion methods (JSON array)" %>
+    <%= f.text_area :ingestion_methods, rows: 2,
+                    placeholder: '["webhook","manual"]' %>
+  </div>
+
+  <%= f.submit class: "tiler-btn tiler-btn-primary" %>
+<% end %>

@@ -1,0 +1,6 @@
+<% content_for :title, "Edit Dashboard" %>
+<h1>Edit Dashboard</h1>
+<%= render "form", dashboard: @dashboard %>
+<%= button_to "Delete", dashboard_path(@dashboard), method: :delete,
+              class: "tiler-btn tiler-btn-danger",
+              data: { turbo_confirm: "Delete this dashboard?" } %>
