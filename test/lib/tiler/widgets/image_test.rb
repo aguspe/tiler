@@ -107,6 +107,19 @@ module Tiler
         assert_includes render_partial(http_panel), 'src="http://example.com/x.png"'
         assert_includes render_partial(https_panel), 'src="https://example.com/y.png"'
       end
+
+      test "url with file scheme renders placeholder" do
+        panel = panel_with(url: "file:///etc/passwd")
+        html = render_partial(panel)
+        assert_equal 0, html.scan(/<img\b/).size
+        assert_match(/tiler-muted/, html)
+      end
+
+      test "url with no scheme (bare string) renders placeholder" do
+        panel = panel_with(url: "x.png")
+        html = render_partial(panel)
+        assert_equal 0, html.scan(/<img\b/).size
+      end
     end
   end
 end

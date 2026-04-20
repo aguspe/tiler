@@ -178,6 +178,24 @@ module Tiler
         assert_includes avatars, "https://example.com/y.png"
       end
 
+      test "avatar with file scheme is dropped" do
+        src = create_data_source
+        dash = create_dashboard
+        create_record(src, { quote: "Q", pic: "file:///etc/passwd" })
+        panel = create_panel(dash, widget_type: "comments", data_source: src,
+                             config: { quote_column: "quote", avatar_column: "pic" }.to_json)
+        assert_nil panel.data[:items].first[:avatar]
+      end
+
+      test "avatar with no scheme (bare string) is dropped" do
+        src = create_data_source
+        dash = create_dashboard
+        create_record(src, { quote: "Q", pic: "x.png" })
+        panel = create_panel(dash, widget_type: "comments", data_source: src,
+                             config: { quote_column: "quote", avatar_column: "pic" }.to_json)
+        assert_nil panel.data[:items].first[:avatar]
+      end
+
       test "items with blank quote payload are dropped" do
         src = create_data_source
         dash = create_dashboard

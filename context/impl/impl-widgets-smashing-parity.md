@@ -188,3 +188,11 @@ Build site: context/plans/build-site.md
 - `bundle exec rails test test/lib/tiler/widgets/image_test.rb test/lib/tiler/widgets/meter_test.rb` → `35 runs, 73 assertions, 0 failures, 0 errors, 0 skips`.
 - Full-suite `bundle exec rails test` → `127 runs, 263 assertions, 0 failures, 0 errors, 0 skips` — no regressions.
 - Did NOT commit (per dispatch instructions). Did NOT touch comments.rb, _comments.html.erb, comments_test.rb, application.css, _image.html.erb, engine.rb, or seed task — those are the parallel agent's lane.
+
+### T-015: Close R7/R8 test-coverage gaps (F-013, F-014) — DONE (2026-04-19)
+- Test-only task closing P2 gaps from round-2 inspection: R7 (file:/bare-string URL coverage) and R8 (blank/nil aggregation fallback). Zero source changes.
+- `image_test.rb`: appended two tests — `"url with file scheme renders placeholder"` (asserts zero `<img>` + `tiler-muted` placeholder for `file:///etc/passwd`) and `"url with no scheme (bare string) renders placeholder"` (asserts zero `<img>` for `"x.png"`). Both rely on existing `safe_url` allowlist in `image.rb` (T-011) which coerces non-http(s) URLs to `""` → partial's `data[:url].blank?` branch.
+- `comments_test.rb`: appended two tests — `"avatar with file scheme is dropped"` and `"avatar with no scheme (bare string) is dropped"` — both assert `panel.data[:items].first[:avatar]` is `nil` for `file:///etc/passwd` and `"x.png"` payloads respectively. Rely on `CommentsQuery#safe_url` (T-011 comments side) which whitelists only `http://`/`https://`.
+- `meter_test.rb`: appended two tests — `"blank aggregation falls back to last"` (passes `aggregation: ""`, asserts `data[:value] == 500.0`) and `"nil aggregation falls back to last"` (omits `aggregation` key entirely from config, asserts `data[:value] == 500.0`). Both rely on `MeterQuery`'s `ALLOWED_AGG` whitelist (T-012) substituting `"last"` for blank/missing values, plus the fixture's most-recent (1h ago) record with `value: 500.0`.
+- Run results from `/Users/augustingottlieb/tiler` root: `bundle exec rails test test/lib/tiler/widgets/` → `63 runs, 135 assertions, 0 failures, 0 errors, 0 skips` (was 57 → +6 new tests, exactly matching dispatch expectation).
+- Constraints respected: zero source modifications (image.rb, meter.rb, comments.rb, partials, css, engine, seed all untouched). Did NOT commit.

@@ -125,6 +125,17 @@ module Tiler
         assert_equal 500.0, data[:value]
       end
 
+      test "blank aggregation falls back to last" do
+        data = panel_with(value_column: "value", aggregation: "", max: 1000).data
+        assert_equal 500.0, data[:value]
+      end
+
+      test "nil aggregation falls back to last" do
+        panel = create_panel(@dash, widget_type: "meter", data_source: @source,
+                             config: { value_column: "value", max: 1000 }.to_json)
+        assert_equal 500.0, panel.data[:value]
+      end
+
       test "missing max renders configuration placeholder, not gauge" do
         panel = create_panel(@dash, widget_type: "meter", data_source: @source,
                              config: { value_column: "value", aggregation: "last" }.to_json)
