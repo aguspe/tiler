@@ -44,7 +44,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .tiler-grid-stack .grid-stack-item-content .tiler-panel,
 .tiler-grid-stack .grid-stack-item-content .tiler-skeleton { height: 100%; }
 .tiler-grid-stack .tiler-panel { display: flex; flex-direction: column; }
-.tiler-grid-stack .tiler-panel-body { flex: 1; overflow: auto; }
+.tiler-grid-stack .tiler-panel-body { flex: 1 1 auto; overflow: auto; min-height: 0; padding: 0.75rem; }
+.tiler-grid-stack .tiler-metric { padding: 0.25rem 0; }
+.tiler-grid-stack .tiler-metric-value { font-size: 2rem; line-height: 1.1; }
+.tiler-grid-stack .tiler-metric-label { margin-top: 0.125rem; }
+.tiler-grid-stack .tiler-metric-window { margin-top: 0.25rem; }
+.tiler-grid-stack .tiler-delta { margin-top: 0.125rem; }
 .grid-stack.grid-stack-static .grid-stack-item { cursor: default; }
 .grid-stack > .grid-stack-item.ui-draggable-dragging,
 .grid-stack > .grid-stack-item.ui-resizable-resizing {
