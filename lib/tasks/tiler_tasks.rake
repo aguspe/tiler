@@ -61,8 +61,8 @@ namespace :tiler do
                           config: { url: "https://smashing.github.io/" }.to_json)
       dash.panels.create!(title: "Logo", widget_type: "image",
                           x: 0, y: 8, width: 4, height: 3,
-                          config: { url: "https://smashing.github.io/img/logo.png",
-                                    alt: "Smashing logo", fit: "contain" }.to_json)
+                          config: { url: "https://picsum.photos/seed/tiler/400/300",
+                                    alt: "Smashing dashboard screenshot", fit: "contain" }.to_json)
       dash.panels.create!(title: "Avg duration meter", widget_type: "meter",
                           x: 4, y: 8, width: 4, height: 3, data_source: source,
                           config: { value_column: "duration", aggregation: "avg",

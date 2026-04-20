@@ -79,6 +79,49 @@ module Tiler
       wait_for_panel_persisted(@clock, x: 6, y: 0, w: 4, h: 3)
     end
 
+    test "drag-drop: move then undo restores position" do
+      visit dashboard_path(@dash.slug)
+      assert_selector "turbo-frame#tiler_panel_#{@metric.id}", wait: 5
+      click_button "Edit Layout"
+
+      original = { x: @metric.x, y: @metric.y, w: @metric.width, h: @metric.height }
+
+      page.execute_script(<<~JS, @metric.id)
+        const id = arguments[0];
+        const grid = document.querySelector('.grid-stack').gridstack;
+        const w = grid.engine.nodes.find(n => n.el.getAttribute('gs-id') == String(id));
+        grid.update(w.el, { x: 2, y: 4, w: 3, h: 2 });
+      JS
+      wait_for_panel_persisted(@metric, x: 2, y: 4, w: 3, h: 2)
+
+      page.execute_script(<<~JS, @metric.id, original)
+        const id = arguments[0];
+        const orig = arguments[1];
+        const grid = document.querySelector('.grid-stack').gridstack;
+        const w = grid.engine.nodes.find(n => n.el.getAttribute('gs-id') == String(id));
+        grid.update(w.el, { x: orig.x, y: orig.y, w: orig.w, h: orig.h });
+      JS
+      wait_for_panel_persisted(@metric, x: original[:x], y: original[:y], w: original[:w], h: original[:h])
+    end
+
+    test "drag-drop: two panels moved simultaneously both persist" do
+      visit dashboard_path(@dash.slug)
+      assert_selector "turbo-frame#tiler_panel_#{@metric.id}", wait: 5
+      click_button "Edit Layout"
+
+      page.execute_script(<<~JS, @metric.id, @clock.id)
+        const [mid, cid] = [arguments[0], arguments[1]];
+        const grid = document.querySelector('.grid-stack').gridstack;
+        const m = grid.engine.nodes.find(n => n.el.getAttribute('gs-id') == String(mid));
+        const c = grid.engine.nodes.find(n => n.el.getAttribute('gs-id') == String(cid));
+        grid.update(m.el, { x: 0, y: 6, w: 4, h: 2 });
+        grid.update(c.el, { x: 8, y: 6, w: 4, h: 2 });
+      JS
+
+      wait_for_panel_persisted(@metric, x: 0, y: 6, w: 4, h: 2)
+      wait_for_panel_persisted(@clock,  x: 8, y: 6, w: 4, h: 2)
+    end
+
     private
 
     def wait_for_panel_persisted(panel, x:, y:, w:, h:, timeout: 5)

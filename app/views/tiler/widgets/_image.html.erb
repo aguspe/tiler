@@ -1,10 +1,13 @@
 <% if data[:url].blank? %>
   <p class="tiler-muted">No image URL configured.</p>
 <% else %>
-  <img class="tiler-image"
-       src="<%= data[:url] %>"
-       alt="<%= data[:alt] %>"
-       style="object-fit: <%= data[:fit] %>; width: 100%; height: 100%;"
-       loading="lazy"
-       referrerpolicy="no-referrer">
+  <div class="tiler-image-wrap">
+    <img class="tiler-image"
+         src="<%= data[:url] %>"
+         alt="<%= data[:alt] %>"
+         style="object-fit: <%= data[:fit] %>;"
+         loading="lazy"
+         referrerpolicy="no-referrer"
+         onerror="this.parentElement.classList.add('tiler-image-broken'); this.remove();">
+  </div>
 <% end %>

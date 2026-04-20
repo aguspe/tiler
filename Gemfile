@@ -18,4 +18,6 @@ gem "rubocop-rails-omakase", require: false
 group :test do
   gem "capybara"
   gem "selenium-webdriver"
+  gem "axe-core-capybara"
+  gem "axe-matchers"
 end

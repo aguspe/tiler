@@ -248,3 +248,17 @@ Build site: context/plans/build-site.md
 - Full-suite: `bundle exec rails test` → `140 runs, 287 assertions, 0 failures, 0 errors, 0 skips` — no regressions.
 - Seed: `cd test/dummy && rails db:reset && rails tiler:seed` → clean.
 - Constraints respected: did NOT touch image.rb, comments.rb, image_test.rb, comments_test.rb (Agent B's lane). Did NOT commit.
+
+### T-021: Widget aesthetics + image onerror + reliable seed URL — DONE (2026-04-19)
+
+| Task | Description | Status | Files |
+|------|-------------|--------|-------|
+| T-021 | Widget aesthetics CSS + image onerror + reliable seed URL | DONE | `_image.html.erb`, `_meter.html.erb`, `_comments.html.erb`, `application.css`, `tiler_tasks.rake` |
+
+- `_image.html.erb`: wrapped `<img>` in `<div class="tiler-image-wrap">`; dropped inline `width/height: 100%` (CSS handles via `.tiler-image-wrap img`); kept inline `style="object-fit: ...;"` (tests grep for substring); added `onerror="this.parentElement.classList.add('tiler-image-broken'); this.remove();"` so a 404 swaps in a "Image unavailable" placeholder via CSS `::after`.
+- `_meter.html.erb`: no structural change — existing `<div class="tiler-meter">` already wraps `<svg class="tiler-meter-svg">`.
+- `_comments.html.erb`: no DOM change — avatar/quote/name order already correct inside `.tiler-comment`.
+- `application.css`: replaced original 2-line `.tiler-comments .tiler-comment` rules at lines 127-128 with three blocks: Image (`.tiler-image-wrap` flex-center, `max-width/height:100%` on `img`, `.tiler-image-broken::after` "Image unavailable"), Meter (`.tiler-meter` flex-center, `.tiler-meter-svg` `width:100%;max-width:240px;max-height:100%` — caps gauge so value text never clips), Comments (centered container, `.tiler-comment` hidden by default + active reveals as flex column with avatar 48px round, italic quote, muted name). Preserved `display:none`/`display:flex` toggle so the rotator JS still controls visibility (the dispatch's two-rule layout would have broken the test "exactly one item has tiler-comment-active class on initial render" semantics by rendering all 4 simultaneously — consolidated layout styles onto the `.tiler-comment-active` selector).
+- `tiler_tasks.rake`: image panel `url:` now `https://picsum.photos/seed/tiler/400/300` (deterministic placeholder), `alt:` updated to `"Smashing dashboard screenshot"`. Smashing logo URL was 404ing.
+- Validation: `bundle exec rails test test/lib/tiler/widgets/` → `70 runs, 151 assertions, 0 failures, 0 errors, 0 skips`. Reseed via `cd test/dummy && rake db:reset && rake tiler:seed` → clean. `Tiler::Panel` for image returns new URL in `panel.data`.
+- Constraints respected: did NOT touch `image.rb`/`meter.rb`/`comments.rb` source classes; did NOT touch Gemfile or tests; did NOT commit.
