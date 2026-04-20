@@ -1,0 +1,12 @@
+<% if data[:items].empty? %>
+  <p class="tiler-muted">No items.</p>
+<% else %>
+  <ol class="tiler-list">
+    <% data[:items].each do |item| %>
+      <li class="tiler-list-item">
+        <span class="tiler-list-label"><%= item[:label] %></span>
+        <span class="tiler-list-value"><%= item[:value].is_a?(Numeric) ? number_with_delimiter(item[:value]) : item[:value] %></span>
+      </li>
+    <% end %>
+  </ol>
+<% end %>

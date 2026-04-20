@@ -13,11 +13,19 @@ module Tiler
 
     initializer "tiler.register_builtin_widgets" do
       require "tiler/widgets/metric"
+      require "tiler/widgets/number_with_delta"
       require "tiler/widgets/table"
+      require "tiler/widgets/list"
       require "tiler/widgets/line_chart"
       require "tiler/widgets/bar_chart"
       require "tiler/widgets/pie_chart"
       require "tiler/widgets/status_grid"
+      require "tiler/widgets/clock"
+      require "tiler/widgets/text"
+      require "tiler/widgets/iframe"
+      require "tiler/widgets/image"
+      require "tiler/widgets/meter"
+      require "tiler/widgets/comments"
     end
 
     initializer "tiler.assets" do |app|

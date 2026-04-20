@@ -2,7 +2,7 @@ module Tiler
   class Dashboard < ApplicationRecord
     self.table_name = "tiler_dashboards"
 
-    has_many :panels, -> { order(:position) }, class_name: "Tiler::Panel",
+    has_many :panels, -> { layout_order }, class_name: "Tiler::Panel",
              foreign_key: :tiler_dashboard_id, dependent: :destroy
 
     REFRESH_OPTIONS = {

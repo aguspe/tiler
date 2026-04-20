@@ -24,10 +24,17 @@
                  include_blank: "— none —" %>
   </div>
 
-  <div class="tiler-field">
-    <%= f.label :col_span, "Width" %>
-    <%= f.select :col_span, { "Half" => 1, "Full" => 2 } %>
+  <div class="tiler-field-row">
+    <div class="tiler-field">
+      <%= f.label :width, "Width (1–12)" %>
+      <%= f.number_field :width, min: 1, max: 12 %>
+    </div>
+    <div class="tiler-field">
+      <%= f.label :height, "Height (1–12)" %>
+      <%= f.number_field :height, min: 1, max: 12 %>
+    </div>
   </div>
+  <p class="tiler-hint">You can also drag & resize panels directly on the dashboard.</p>
 
   <div class="tiler-field">
     <%= f.label :config, "Config (JSON)" %>

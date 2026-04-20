@@ -1,0 +1,45 @@
+<% if data[:max].nil? %>
+  <p class="tiler-muted">Configure a numeric <code>max</code>.</p>
+<% else %>
+  <%
+    v = data[:value]
+    mn = data[:min].to_f
+    mx = data[:max].to_f
+    has_value = v.is_a?(Numeric) && mx > mn
+    pct = if has_value
+            ((v.to_f - mn) / (mx - mn)).clamp(0.0, 1.0)
+          else
+            0.0
+          end
+
+    cx, cy, r = 100, 100, 80
+    start_deg = -125.0
+    sweep_deg = 250.0
+    end_deg   = start_deg + sweep_deg * pct
+
+    to_xy = ->(deg) {
+      rad = deg * Math::PI / 180.0
+      [cx + r * Math.cos(rad), cy + r * Math.sin(rad)]
+    }
+
+    bg_start_x, bg_start_y = to_xy.call(start_deg)
+    bg_end_x,   bg_end_y   = to_xy.call(start_deg + sweep_deg)
+    fg_end_x,   fg_end_y   = to_xy.call(end_deg)
+
+    large_bg = sweep_deg > 180 ? 1 : 0
+    large_fg = (sweep_deg * pct) > 180 ? 1 : 0
+
+    display_value = has_value ? (v.to_f.round(2).to_s.sub(/\.0+\z/, "")) : "—"
+  %>
+  <div class="tiler-meter">
+    <svg viewBox="0 0 200 200" class="tiler-meter-svg" preserveAspectRatio="xMidYMid meet">
+      <path d="M <%= bg_start_x.round(2) %> <%= bg_start_y.round(2) %> A <%= r %> <%= r %> 0 <%= large_bg %> 1 <%= bg_end_x.round(2) %> <%= bg_end_y.round(2) %>"
+            fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"></path>
+      <% if pct > 0 %>
+        <path d="M <%= bg_start_x.round(2) %> <%= bg_start_y.round(2) %> A <%= r %> <%= r %> 0 <%= large_fg %> 1 <%= fg_end_x.round(2) %> <%= fg_end_y.round(2) %>"
+              fill="none" stroke="#3b82f6" stroke-width="14" stroke-linecap="round"></path>
+      <% end %>
+      <text x="100" y="115" text-anchor="middle" class="tiler-meter-value" font-size="28" font-weight="600" fill="#111827"><%= data[:prefix] %><%= display_value %><%= data[:suffix] %></text>
+    </svg>
+  </div>
+<% end %>

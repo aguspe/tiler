@@ -5,7 +5,11 @@ module Tiler
     before_action :set_panel, only: [ :edit, :update, :destroy, :preview ]
 
     def new
-      @panel = @dashboard.panels.build(col_span: 1, widget_type: Tiler.widgets.types.first)
+      next_y = (@dashboard.panels.maximum(:y) || -1) + 1
+      @panel = @dashboard.panels.build(
+        width: 6, height: 2, x: 0, y: next_y,
+        widget_type: Tiler.widgets.types.first
+      )
       @data_sources = DataSource.active.by_name
     end
 
@@ -53,7 +57,8 @@ module Tiler
     end
 
     def panel_params
-      params.require(:panel).permit(:tiler_data_source_id, :title, :widget_type, :col_span, :position, :config)
+      params.require(:panel).permit(:tiler_data_source_id, :title, :widget_type,
+                                    :width, :height, :x, :y, :config)
     end
   end
 end

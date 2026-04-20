@@ -2,6 +2,7 @@ Tiler::Engine.routes.draw do
   root to: "dashboards#index"
 
   resources :dashboards, param: :id do
+    member { patch :layout }
     resources :panels, only: [ :new, :create, :edit, :update, :destroy ] do
       member { get :preview }
     end

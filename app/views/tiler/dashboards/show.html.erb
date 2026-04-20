@@ -8,6 +8,7 @@
     <% end %>
   </div>
   <div>
+    <button type="button" class="tiler-btn" data-tiler-toggle-edit>Edit Layout</button>
     <%= link_to "Add Panel", new_dashboard_panel_path(@dashboard), class: "tiler-btn" %>
     <%= link_to "Edit", edit_dashboard_path(@dashboard), class: "tiler-btn" %>
   </div>
@@ -18,35 +19,89 @@
 <% if panels.empty? %>
   <div class="tiler-empty">
     <p>No panels yet.</p>
-    <%= link_to "Add your first panel", new_dashboard_panel_path(@dashboard), class: "tiler-btn tiler-btn-primary" %>
+    <%= link_to "Add your first panel", new_dashboard_panel_path(@dashboard),
+          class: "tiler-btn tiler-btn-primary" %>
   </div>
 <% else %>
-  <div class="tiler-grid"
+  <div class="grid-stack tiler-grid-stack"
+       data-tiler-dashboard-id="<%= @dashboard.id %>"
+       data-tiler-layout-url="<%= layout_dashboard_path(@dashboard) %>"
+       data-tiler-csrf="<%= form_authenticity_token %>"
        <% if @dashboard.refresh_seconds > 0 %>
          data-tiler-refresh="<%= @dashboard.refresh_seconds %>"
        <% end %>>
     <% panels.each do |panel| %>
-      <div class="tiler-cell tiler-cell-span-<%= panel.col_span %>">
-        <%= turbo_frame_tag "tiler_panel_#{panel.id}",
-              src: preview_dashboard_panel_path(@dashboard, panel),
-              loading: :lazy do %>
-          <div class="tiler-skeleton">
-            <div class="tiler-skeleton-title"></div>
-            <div class="tiler-skeleton-body"></div>
-          </div>
-        <% end %>
+      <div class="grid-stack-item"
+           gs-id="<%= panel.id %>"
+           gs-x="<%= panel.x %>"
+           gs-y="<%= panel.y %>"
+           gs-w="<%= panel.width %>"
+           gs-h="<%= panel.height %>">
+        <div class="grid-stack-item-content">
+          <%= turbo_frame_tag "tiler_panel_#{panel.id}",
+                src: preview_dashboard_panel_path(@dashboard, panel),
+                loading: :lazy do %>
+            <div class="tiler-skeleton">
+              <div class="tiler-skeleton-title"></div>
+              <div class="tiler-skeleton-body"></div>
+            </div>
+          <% end %>
+        </div>
       </div>
     <% end %>
   </div>
+
   <script>
     (function() {
-      const grid = document.querySelector('[data-tiler-refresh]');
-      if (!grid) return;
-      const interval = parseInt(grid.dataset.tilerRefresh, 10) * 1000;
-      if (!interval) return;
-      setInterval(function() {
-        grid.querySelectorAll('turbo-frame').forEach(function(f) { f.reload(); });
-      }, interval);
+      const el = document.querySelector('.tiler-grid-stack');
+      if (!el || !window.GridStack) return;
+
+      const grid = GridStack.init({
+        column: 12,
+        cellHeight: 90,
+        margin: 0,
+        staticGrid: true,
+        float: true,
+        handle: '.tiler-panel-header'
+      }, el);
+
+      const toggle = document.querySelector('[data-tiler-toggle-edit]');
+      let editing = false;
+      function setEditing(on) {
+        editing = on;
+        grid.setStatic(!on);
+        grid.enableMove(on);
+        grid.enableResize(on);
+        el.classList.toggle('tiler-editing', on);
+        if (toggle) {
+          toggle.textContent = on ? 'Done Editing' : 'Edit Layout';
+          toggle.classList.toggle('tiler-btn-primary', on);
+        }
+      }
+      if (toggle) toggle.addEventListener('click', function() { setEditing(!editing); });
+
+      grid.on('change', function(_event, items) {
+        const payload = { items: items.map(function(i) {
+          return { id: i.el.getAttribute('gs-id'), x: i.x, y: i.y, w: i.w, h: i.h };
+        })};
+        fetch(el.dataset.tilerLayoutUrl, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': el.dataset.tilerCsrf,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload),
+          credentials: 'same-origin'
+        });
+      });
+
+      const refreshSecs = parseInt(el.dataset.tilerRefresh, 10);
+      if (refreshSecs > 0) {
+        setInterval(function() {
+          el.querySelectorAll('turbo-frame').forEach(function(f) { f.reload(); });
+        }, refreshSecs * 1000);
+      }
     })();
   </script>
 <% end %>

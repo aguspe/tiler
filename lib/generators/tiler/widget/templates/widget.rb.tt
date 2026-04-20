@@ -1,0 +1,29 @@
+module Tiler
+<% if options[:query] -%>
+  class <%= class_name %>Query < ::Tiler::Query::Base
+    def call
+      # Return a Hash consumed by the partial as `data`.
+      # Use helpers from Tiler::Query::Base:
+      #   base_scope          -> filtered ActiveRecord scope
+      #   aggregate(s, c, a)  -> run sum/avg/min/max/count/last
+      #   distinct_values(c)  -> distinct payload values for a column
+      { value: base_scope.count }
+    end
+  end
+<% end -%>
+
+  class <%= class_name %>Widget < ::Tiler::Widget
+    self.type        = "<%= file_name %>"
+    self.partial     = "tiler/widgets/<%= file_name %>"
+    self.label       = "<%= class_name.titleize %>"
+<% if options[:query] -%>
+    self.query_class = <%= class_name %>Query
+<% else -%>
+    self.query_class = nil
+
+    def data
+      { }   # populate from panel.config as needed
+    end
+<% end -%>
+  end
+end

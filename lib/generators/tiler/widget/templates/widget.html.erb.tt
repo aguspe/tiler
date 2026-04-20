@@ -1,0 +1,4 @@
+<%%# locals: panel, data %>
+<div class="tiler-<%= file_name %>">
+  <%%= data.inspect %>
+</div>

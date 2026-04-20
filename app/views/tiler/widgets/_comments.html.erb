@@ -1,0 +1,41 @@
+<% if data[:items].blank? %>
+  <p class="tiler-muted">No comments yet.</p>
+<% else %>
+  <% container_id = "tiler-comments-#{panel.id}" %>
+  <div id="<%= container_id %>"
+       class="tiler-comments"
+       data-tiler-rotate-interval="<%= data[:rotate_seconds] %>">
+    <% data[:items].each_with_index do |item, idx| %>
+      <div class="tiler-comment <%= 'tiler-comment-active' if idx.zero? %>">
+        <% if item[:avatar].present? %>
+          <img class="tiler-comment-avatar"
+               src="<%= item[:avatar] %>"
+               alt=""
+               loading="lazy"
+               referrerpolicy="no-referrer">
+        <% end %>
+        <blockquote class="tiler-comment-quote"><%= item[:quote] %></blockquote>
+        <% if item[:name].present? %>
+          <p class="tiler-comment-name"><%= item[:name] %></p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <script>
+    (function() {
+      var el = document.getElementById('<%= container_id %>');
+      if (!el || el.dataset.tilerCommentsStarted) return;
+      el.dataset.tilerCommentsStarted = '1';
+      var items = el.querySelectorAll('.tiler-comment');
+      if (items.length <= 1) return;
+      var interval = parseInt(el.getAttribute('data-tiler-rotate-interval'), 10) || 8;
+      var i = 0;
+      setInterval(function() {
+        items[i].classList.remove('tiler-comment-active');
+        i = (i + 1) % items.length;
+        items[i].classList.add('tiler-comment-active');
+      }, interval * 1000);
+    })();
+  </script>
+<% end %>

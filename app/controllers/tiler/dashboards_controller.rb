@@ -1,7 +1,7 @@
 module Tiler
   class DashboardsController < ApplicationController
-    before_action :tiler_authorize_manage!, only: [ :new, :create, :edit, :update, :destroy ]
-    before_action :set_dashboard, only: [ :show, :edit, :update, :destroy ]
+    before_action :tiler_authorize_manage!, only: [ :new, :create, :edit, :update, :destroy, :layout ]
+    before_action :set_dashboard, only: [ :show, :edit, :update, :destroy, :layout ]
 
     def index
       @dashboards = Dashboard.by_name
@@ -37,6 +37,23 @@ module Tiler
     def destroy
       @dashboard.destroy!
       redirect_to dashboards_path, notice: "Dashboard deleted."
+    end
+
+    def layout
+      items = Array(params[:items])
+      ActiveRecord::Base.transaction do
+        items.each do |item|
+          panel = @dashboard.panels.find_by(id: item[:id])
+          next unless panel
+          panel.update_columns(
+            x:      item[:x].to_i,
+            y:      item[:y].to_i,
+            width:  item[:w].to_i.clamp(1, 12),
+            height: item[:h].to_i.clamp(1, 12)
+          )
+        end
+      end
+      head :ok
     end
 
     private

@@ -7,11 +7,13 @@ module Tiler
 
     validates :title,       presence: true
     validates :widget_type, presence: true
-    validates :col_span,    inclusion: { in: [ 1, 2 ] }
-    validates :position,    numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+    validates :width,       inclusion: { in: 1..12 }
+    validates :height,      inclusion: { in: 1..12 }
+    validates :x,           numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 11 }
+    validates :y,           numericality: { only_integer: true, greater_than_or_equal_to: 0 }
     validate  :widget_type_registered
 
-    before_validation :assign_default_position, on: :create
+    scope :layout_order, -> { order(:y, :x, :id) }
 
     def parsed_config
       JSON.parse(config.presence || "{}")
@@ -31,11 +33,12 @@ module Tiler
       widget.data
     end
 
-    private
-
-    def assign_default_position
-      self.position ||= (dashboard&.panels&.maximum(:position) || -1) + 1
+    # Backwards-compat alias for templates that still call col_span.
+    def col_span
+      width
     end
+
+    private
 
     def widget_type_registered
       return if Tiler.widgets[widget_type]

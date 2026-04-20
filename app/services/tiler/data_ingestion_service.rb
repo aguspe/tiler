@@ -4,7 +4,7 @@ module Tiler
 
     def initialize(data_source, records, via:, user: nil)
       @data_source = data_source
-      @records     = Array(records)
+      @records     = records.is_a?(Hash) ? [ records ] : Array(records)
       @via         = via
       @user        = user
       @accepted    = 0
