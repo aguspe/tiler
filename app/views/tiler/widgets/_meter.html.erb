@@ -32,7 +32,12 @@
     display_value = has_value ? (v.to_f.round(2).to_s.sub(/\.0+\z/, "")) : "—"
   %>
   <div class="tiler-meter">
-    <svg viewBox="0 0 200 200" class="tiler-meter-svg" preserveAspectRatio="xMidYMid meet">
+    <svg viewBox="0 0 200 200" class="tiler-meter-svg" preserveAspectRatio="xMidYMid meet"
+         role="img"
+         aria-label="<%= panel.title.presence || "Gauge" %>"
+         aria-valuemin="<%= mn %>"
+         aria-valuemax="<%= mx %>"
+         aria-valuenow="<%= has_value ? v.to_f : mn %>">
       <path d="M <%= bg_start_x.round(2) %> <%= bg_start_y.round(2) %> A <%= r %> <%= r %> 0 <%= large_bg %> 1 <%= bg_end_x.round(2) %> <%= bg_end_y.round(2) %>"
             fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"></path>
       <% if pct > 0 %>

@@ -196,6 +196,24 @@ module Tiler
         assert_nil panel.data[:items].first[:avatar]
       end
 
+      test "avatar with leading whitespace is trimmed and accepted" do
+        src = create_data_source
+        dash = create_dashboard
+        create_record(src, { quote: "Q", pic: "  https://example.com/x.png  " })
+        panel = create_panel(dash, widget_type: "comments", data_source: src,
+                             config: { quote_column: "quote", avatar_column: "pic" }.to_json)
+        assert_equal "https://example.com/x.png", panel.data[:items].first[:avatar]
+      end
+
+      test "avatar with uppercase scheme is accepted (case-insensitive)" do
+        src = create_data_source
+        dash = create_dashboard
+        create_record(src, { quote: "Q", pic: "HTTPS://example.com/y.png" })
+        panel = create_panel(dash, widget_type: "comments", data_source: src,
+                             config: { quote_column: "quote", avatar_column: "pic" }.to_json)
+        assert_equal "HTTPS://example.com/y.png", panel.data[:items].first[:avatar]
+      end
+
       test "items with blank quote payload are dropped" do
         src = create_data_source
         dash = create_dashboard

@@ -15,15 +15,19 @@ module Tiler
 
         items =
           if quote_col.present? && safe_col?(quote_col)
-            scope = base_scope.order(recorded_at: :desc).limit(limit)
-            scope.map do |record|
-              payload = parse_payload(record)
-              {
-                quote:  payload[quote_col].to_s,
-                name:   name_col.present?   ? payload[name_col]   : nil,
-                avatar: avatar_col.present? ? safe_url(payload[avatar_col]) : nil
-              }
-            end
+            cols = [Arel.sql(json_extract(quote_col))]
+            cols << (name_col.present? && safe_col?(name_col) ? Arel.sql(json_extract(name_col)) : Arel.sql("NULL"))
+            cols << (avatar_col.present? && safe_col?(avatar_col) ? Arel.sql(json_extract(avatar_col)) : Arel.sql("NULL"))
+
+            base_scope.order(recorded_at: :desc).limit(limit)
+                      .pluck(*cols)
+                      .map do |row|
+                        {
+                          quote:  row[0].to_s,
+                          name:   row[1].nil? ? nil : row[1],
+                          avatar: safe_url(row[2])
+                        }
+                      end
           else
             []
           end
@@ -39,8 +43,10 @@ module Tiler
       private
 
       def safe_url(u)
-        s = u.to_s
-        (s.start_with?("http://") || s.start_with?("https://")) ? s : nil
+        s = u.to_s.strip
+        return nil if s.empty?
+        prefix = s[0, 8].downcase
+        (prefix.start_with?("http://") || prefix.start_with?("https://")) ? s : nil
       end
 
       def clamp_limit(v)
@@ -53,14 +59,6 @@ module Tiler
       def rotate_seconds
         n = config["rotate_seconds"].to_i
         n > 0 ? n : DEFAULT_ROTATE_SECONDS
-      end
-
-      def parse_payload(record)
-        raw = record.payload
-        return raw if raw.is_a?(Hash)
-        JSON.parse(raw.to_s)
-      rescue JSON::ParserError
-        {}
       end
     end
 

@@ -458,6 +458,16 @@ Every kit acceptance criterion mapped to one or more tasks. 41 / 41 covered, 0 G
 |-------|-------------------------------------------------------------|-------------|-----------|--------|
 | T-015 | Close R7/R8 test-coverage gaps (file:/bare-string + blank-aggregation) | R7, R8, R10 | T-011, T-012, T-014 | S |
 
+## Tier 6 — P3 polish (added 2026-04-20 from deferred findings)
+
+| Task  | Title                                                       | From Findings | Effort |
+|-------|-------------------------------------------------------------|---------------|--------|
+| T-016 | Meter SVG a11y attrs (role + aria-valuemin/now/max)         | F-010         | S      |
+| T-017 | Kit prose: replace `Tiler.widgets.lookup` with `[]`/`fetch` | F-009         | S      |
+| T-018 | Seed quotes data source for comments demo                   | F-012         | S      |
+| T-019 | Unify safe_url: strip + downcase scheme + consistent return | F-015, F-016, F-019 | S |
+| T-020 | safe_fit nil test + comments query pluck perf                | F-017, F-011  | S      |
+
 ### T-015: Close R7/R8 test-coverage gaps
 **Cavekit:** widgets-smashing-parity / R7 + R8
 **blockedBy:** T-011, T-012, T-014

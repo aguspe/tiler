@@ -189,6 +189,31 @@ Build site: context/plans/build-site.md
 - Full-suite `bundle exec rails test` → `127 runs, 263 assertions, 0 failures, 0 errors, 0 skips` — no regressions.
 - Did NOT commit (per dispatch instructions). Did NOT touch comments.rb, _comments.html.erb, comments_test.rb, application.css, _image.html.erb, engine.rb, or seed task — those are the parallel agent's lane.
 
+### T-019: Unify safe_url contract across image + comments (F-015, F-016, F-019) — DONE (2026-04-19)
+- Edited `/Users/augustingottlieb/tiler/lib/tiler/widgets/image.rb`: rewrote `safe_url` to (a) `.strip` leading/trailing whitespace, (b) return `nil` for empty/rejected (was `""` previously — F-015 inconsistency), (c) downcase only the first 8 chars (`https://` is 8 chars) for case-insensitive scheme check without altering the URL path which is RFC 3986 case-sensitive. Removed now-unused `ALLOWED_SCHEMES` constant. Image partial uses `data[:url].blank?` so coercion from `""` to `nil` is behavior-equivalent.
+- Edited `/Users/augustingottlieb/tiler/lib/tiler/widgets/comments.rb`: replaced `CommentsQuery#safe_url` body with the same identical helper (strip + 8-char downcased prefix check + nil-on-reject). Both widgets now share the exact same safe_url contract.
+- Tests added to `image_test.rb`: `"url with leading whitespace is trimmed and accepted"`, `"url with uppercase scheme is accepted (case-insensitive)"`, `"url returns nil when rejected (not empty string)"`. The trim test asserts the trimmed URL appears in the rendered `src=` attribute (no surrounding whitespace). The uppercase-scheme test confirms `HTTPS://example.com/x.png` passes through unchanged (only the prefix-check is case-insensitive; the rest of the URL is preserved verbatim because path is case-sensitive). The nil-rejection test asserts `panel.data[:url]` is `nil` (not `""`) when scheme rejected — proves F-015 fixed.
+- Tests added to `comments_test.rb`: `"avatar with leading whitespace is trimmed and accepted"` and `"avatar with uppercase scheme is accepted (case-insensitive)"` — same contracts as image side, applied to the comments avatar field.
+- Resolves F-015 (API consistency: both return nil), F-016 (whitespace tolerated), F-019 (case-insensitive scheme).
+
+### T-020a: safe_fit nil-value defensive test (F-017) — DONE (2026-04-19)
+- Test-only addition to `image_test.rb`: `"fit with nil value falls back to contain"` — explicitly passes `fit: nil` in JSON config (deserializes to nil after `JSON.parse`), asserts `panel.data[:fit] == "contain"`. Exercises the `safe_fit(nil)` path which was previously untested but already handled correctly by the existing `f.to_s` coercion (nil → "" → not in ALLOWED_FIT → fallback to "contain"). No source change.
+- Resolves F-017.
+
+### T-020b: Comments pluck perf optimization (F-011) — DONE (2026-04-19)
+- Refactored `/Users/augustingottlieb/tiler/lib/tiler/widgets/comments.rb` `CommentsQuery#call`: replaced `scope.map { |record| ... parse_payload(record) ... }` (loaded full ActiveRecord rows then JSON-parsed in Ruby) with a `.pluck(*cols)` call where `cols` is built from the `Tiler::Query::Base#json_extract` SQLite JSON1 helper. SQLite extracts the three payload keys directly during the scan, returning a 2D array of strings/nils — no AR row instantiation, no JSON.parse round-trip per row.
+- Column array construction: `cols = [Arel.sql(json_extract(quote_col))]`; name and avatar are conditionally `Arel.sql(json_extract(col))` if config column is present AND `safe_col?` (alphanumeric+underscore guard from base), else `Arel.sql("NULL")` placeholder so the result rows always have 3 elements at fixed indices. The outer `safe_col?(quote_col)` guard already gates the whole branch, so the inner `safe_col?` calls protect name/avatar against payload-key injection independently.
+- Result mapping: `row[0].to_s` for quote (preserves "" → reject branch downstream), `row[1]` passthrough for name (no validation), `safe_url(row[2])` for avatar (existing scheme allowlist).
+- Dropped private `parse_payload(record)` helper — no longer used after the AR-row iteration was removed.
+- Kept `safe_url` helper because it still gates the avatar (single call site survives the refactor).
+- Data-shape contract unchanged: 3-key item hashes (`:quote, :name, :avatar`), same ordering (`recorded_at DESC`), same limit clamping, same blank-quote rejection, same rotate_seconds default. All 21 pre-existing comments tests pass unchanged after the refactor — confirms the contract is preserved.
+- Resolves F-011.
+
+### Tier 6 P3 Batch B Validation — 2026-04-19
+- `bundle exec rails test test/lib/tiler/widgets/` → `70 runs, 151 assertions, 0 failures, 0 errors, 0 skips` (was 63 → +7 new tests: 4 image, 3 comments; +1 over the dispatch's "~6" estimate due to the explicit safe_fit nil test).
+- Full-suite `bundle exec rails test` → `140 runs, 287 assertions, 0 failures, 0 errors, 0 skips` — no regressions in pre-existing tests.
+- Constraints respected: did NOT touch meter.rb, meter partial, seed task, kit doc, application.css (Agent A's lane). Did NOT commit.
+
 ### T-015: Close R7/R8 test-coverage gaps (F-013, F-014) — DONE (2026-04-19)
 - Test-only task closing P2 gaps from round-2 inspection: R7 (file:/bare-string URL coverage) and R8 (blank/nil aggregation fallback). Zero source changes.
 - `image_test.rb`: appended two tests — `"url with file scheme renders placeholder"` (asserts zero `<img>` + `tiler-muted` placeholder for `file:///etc/passwd`) and `"url with no scheme (bare string) renders placeholder"` (asserts zero `<img>` for `"x.png"`). Both rely on existing `safe_url` allowlist in `image.rb` (T-011) which coerces non-http(s) URLs to `""` → partial's `data[:url].blank?` branch.
@@ -196,3 +221,30 @@ Build site: context/plans/build-site.md
 - `meter_test.rb`: appended two tests — `"blank aggregation falls back to last"` (passes `aggregation: ""`, asserts `data[:value] == 500.0`) and `"nil aggregation falls back to last"` (omits `aggregation` key entirely from config, asserts `data[:value] == 500.0`). Both rely on `MeterQuery`'s `ALLOWED_AGG` whitelist (T-012) substituting `"last"` for blank/missing values, plus the fixture's most-recent (1h ago) record with `value: 500.0`.
 - Run results from `/Users/augustingottlieb/tiler` root: `bundle exec rails test test/lib/tiler/widgets/` → `63 runs, 135 assertions, 0 failures, 0 errors, 0 skips` (was 57 → +6 new tests, exactly matching dispatch expectation).
 - Constraints respected: zero source modifications (image.rb, meter.rb, comments.rb, partials, css, engine, seed all untouched). Did NOT commit.
+
+### T-016: Meter SVG a11y (F-010) — DONE (2026-04-19)
+- Edited `/Users/augustingottlieb/tiler/app/views/tiler/widgets/_meter.html.erb`: added five aria attrs to the `<svg>` opening tag inside the `data[:max].present?` branch only — `role="img"`, `aria-label="<%= panel.title.presence || "Gauge" %>"`, `aria-valuemin="<%= mn %>"`, `aria-valuemax="<%= mx %>"`, `aria-valuenow="<%= has_value ? v.to_f : mn %>"`. Placeholder branch (`<p class="tiler-muted">`) untouched per dispatch.
+- Used `panel.title.presence || "Gauge"` so empty-title panels still get a sensible accessible label.
+- Added test `"rendered SVG carries aria meter attrs"` in `meter_test.rb` after R9 placeholder test — asserts `role="img"`, `aria-valuemin=`, `aria-valuemax=`, `aria-valuenow=` are present in rendered HTML.
+- Test result: meter file 23 → 24 runs, 44 → 45 assertions, all green.
+
+### T-017: Kit doc fix (F-009) — DONE (2026-04-19)
+- Edited `/Users/augustingottlieb/tiler/context/kits/cavekit-widgets-smashing-parity.md`: replaced three occurrences of `Tiler.widgets.lookup("...")` with `Tiler.widgets["..."]` in R1-AC1 / R2-AC1 / R3-AC1 — matches actual `Tiler::WidgetRegistry` API which exposes `[]`/`fetch`, not `lookup`.
+- Bumped frontmatter `last_edited` to `2026-04-20T00:00:00Z`.
+- Appended Changes entry: `- 2026-04-20: Fixed kit prose — Tiler.widgets.lookup → Tiler.widgets[...] (registry has [] / fetch, not lookup). Closes F-009.`
+- Doc-only; no source/test changes.
+
+### T-018: Seed quotes data source (F-012) — DONE (2026-04-19)
+- Edited `/Users/augustingottlieb/tiler/lib/tasks/tiler_tasks.rake`:
+  1. Added `quotes_source = Tiler::DataSource.find_or_create_by!(slug: "demo_quotes")` block alongside `source` (demo_requests), schema `[quote, author, avatar]`, ingestion `[manual]`.
+  2. Retargeted the existing `dash.panels.create!(title: "Recent comments", ...)` line: changed `data_source: source` → `data_source: quotes_source`; expanded config to `{ quote_column: "quote", name_column: "author", avatar_column: "avatar", time_window: "7d", limit: 10, rotate_seconds: 5 }`.
+  3. Added `if quotes_source.data_records.empty?` block seeding 5 sample quote records (Kent Beck, Donald Knuth, Leonardo da Vinci, John Johnson, Cory House) with pravatar.cc avatars, staggered `recorded_at` (1h..5h ago).
+- Verified via `cd test/dummy && rails db:reset && rails tiler:seed`: clean exit with `Tiler seeded. Visit /tiler/dashboards/demo`.
+- Verified via `rails runner`: `demo_quotes` source exists with 5 records; comments panel `data_source.slug == "demo_quotes"`; `panel.data` returns 5 items each with `{quote:, name:, avatar:}` populated correctly.
+
+### Tier 6 P3 Batch A Validation — 2026-04-19
+- `bundle exec rails test test/lib/tiler/widgets/meter_test.rb` → `24 runs, 45 assertions, 0 failures, 0 errors, 0 skips` (was 23/44 — +1 aria test).
+- All-widgets: `bundle exec rails test test/lib/tiler/widgets/` → `70 runs, 151 assertions, 0 failures, 0 errors, 0 skips`.
+- Full-suite: `bundle exec rails test` → `140 runs, 287 assertions, 0 failures, 0 errors, 0 skips` — no regressions.
+- Seed: `cd test/dummy && rails db:reset && rails tiler:seed` → clean.
+- Constraints respected: did NOT touch image.rb, comments.rb, image_test.rb, comments_test.rb (Agent B's lane). Did NOT commit.

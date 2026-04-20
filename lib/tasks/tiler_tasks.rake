@@ -12,6 +12,18 @@ namespace :tiler do
       s.ingestion_methods = [ "webhook", "manual" ].to_json
     end
 
+    quotes_source = Tiler::DataSource.find_or_create_by!(slug: "demo_quotes") do |s|
+      s.name              = "Demo Quotes"
+      s.description       = "Sample quotes for the comments widget."
+      s.active            = true
+      s.schema_definition = [
+        { "key" => "quote",  "type" => "string" },
+        { "key" => "author", "type" => "string" },
+        { "key" => "avatar", "type" => "string" }
+      ].to_json
+      s.ingestion_methods = [ "manual" ].to_json
+    end
+
     dash = Tiler::Dashboard.find_or_create_by!(slug: "demo") do |d|
       d.name            = "Demo Dashboard"
       d.description     = "Seeded by Tiler."
@@ -57,8 +69,9 @@ namespace :tiler do
                                     time_window: "24h", min: 0, max: 1000,
                                     suffix: " ms" }.to_json)
       dash.panels.create!(title: "Recent comments", widget_type: "comments",
-                          x: 8, y: 8, width: 4, height: 3, data_source: source,
-                          config: { quote_column: "status", time_window: "7d",
+                          x: 8, y: 8, width: 4, height: 3, data_source: quotes_source,
+                          config: { quote_column: "quote", name_column: "author",
+                                    avatar_column: "avatar", time_window: "7d",
                                     limit: 10, rotate_seconds: 5 }.to_json)
     end
 
@@ -67,6 +80,22 @@ namespace :tiler do
         source.data_records.create!(
           payload:      { status: %w[ok ok ok error].sample, duration: rand(5.0..900.0).round(2) }.to_json,
           recorded_at:  rand(7.days).seconds.ago,
+          ingested_via: "manual"
+        )
+      end
+    end
+
+    if quotes_source.data_records.empty?
+      [
+        { quote: "Make it work, make it right, make it fast.",  author: "Kent Beck",        avatar: "https://i.pravatar.cc/64?u=kent"  },
+        { quote: "Premature optimization is the root of all evil.", author: "Donald Knuth", avatar: "https://i.pravatar.cc/64?u=knuth" },
+        { quote: "Simplicity is the ultimate sophistication.",  author: "Leonardo da Vinci", avatar: "https://i.pravatar.cc/64?u=leo"  },
+        { quote: "First, solve the problem. Then, write the code.", author: "John Johnson", avatar: "https://i.pravatar.cc/64?u=john" },
+        { quote: "Code is like humor. When you have to explain it, it's bad.", author: "Cory House", avatar: "https://i.pravatar.cc/64?u=cory" }
+      ].each_with_index do |q, i|
+        quotes_source.data_records.create!(
+          payload:      q.to_json,
+          recorded_at:  (i + 1).hours.ago,
           ingested_via: "manual"
         )
       end

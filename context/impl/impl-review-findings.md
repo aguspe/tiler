@@ -18,10 +18,10 @@ Source: `/ck:check` peer review of T-001..T-009.
 | F-006: Comments name/avatar test uses tautological regex (matches non-existent `missing` literal) | P2 | test/lib/tiler/widgets/comments_test.rb | NEW | T-014 (R10) |
 | F-007: Meter prefix/suffix test only `assert_match(/500/)` — passes even with `nil.inspect` | P2 | test/lib/tiler/widgets/meter_test.rb | NEW | T-014 (R10) |
 | F-008: `image.url` and avatar src accept `javascript:`/`data:`/`file:` schemes | P2 | lib/tiler/widgets/image.rb, lib/tiler/widgets/comments.rb, partials | NEW | T-011 (R7) |
-| F-009: Cavekit prose mentions `Tiler.widgets.lookup(...)` — registry has no `lookup` | P3 | context/kits/cavekit-widgets-smashing-parity.md | DEFERRED | doc-only; revise next pass |
-| F-010: Meter SVG missing `role="img"` + aria-valuemin/now/max | P3 | app/views/tiler/widgets/_meter.html.erb | DEFERRED | a11y; future kit |
-| F-011: CommentsQuery loads full ARrows + JSON-parses in Ruby | P3 | lib/tiler/widgets/comments.rb | DEFERRED | bounded by limit=100; low impact |
-| F-012: Demo seed uses `quote_column: "status"` → rotation cycles "ok"/"error" not real quotes | P3 | lib/tasks/tiler_tasks.rake | DEFERRED | demo-UX cosmetic |
+| F-009: Cavekit prose mentions `Tiler.widgets.lookup(...)` — registry has no `lookup` | P3 | context/kits/cavekit-widgets-smashing-parity.md | RESOLVED | T-017 — replaced with `Tiler.widgets[...]` |
+| F-010: Meter SVG missing `role="img"` + aria-valuemin/now/max | P3 | app/views/tiler/widgets/_meter.html.erb | RESOLVED | T-016 — aria attrs added |
+| F-011: CommentsQuery loads full ARrows + JSON-parses in Ruby | P3 | lib/tiler/widgets/comments.rb | RESOLVED | T-020b — pluck via json_extract |
+| F-012: Demo seed uses `quote_column: "status"` → rotation cycles "ok"/"error" not real quotes | P3 | lib/tasks/tiler_tasks.rake | RESOLVED | T-018 — demo_quotes source seeded |
 
 ## Resolution Plan
 
@@ -40,11 +40,11 @@ Previous F-001..F-008 all CONFIRMED FIXED.
 |---------|----------|---------|--------|------------------|
 | F-013: R7 enumerates `file:` + bare-string scheme tests for both widgets; not present | P2 | test/lib/tiler/widgets/{image,comments}_test.rb | NEW | T-015 |
 | F-014: Meter aggregation `presence || "last"` branch (blank/nil) untested | P2 | test/lib/tiler/widgets/meter_test.rb | NEW | T-015 |
-| F-015: image safe_url returns `""`; comments safe_url returns `nil` — API inconsistency | P3 | lib/tiler/widgets/{image,comments}.rb | DEFERRED | cosmetic |
-| F-016: safe_url no `.strip` before scheme check — leading whitespace silently rejected | P3 | lib/tiler/widgets/{image,comments}.rb | DEFERRED | UX papercut |
-| F-017: `safe_fit(nil)` defensive path untested | P3 | test/lib/tiler/widgets/image_test.rb | DEFERRED | low value |
+| F-015: image safe_url returns `""`; comments safe_url returns `nil` — API inconsistency | P3 | lib/tiler/widgets/{image,comments}.rb | RESOLVED | T-019 — both return nil |
+| F-016: safe_url no `.strip` before scheme check — leading whitespace silently rejected | P3 | lib/tiler/widgets/{image,comments}.rb | RESOLVED | T-019 — strip added |
+| F-017: `safe_fit(nil)` defensive path untested | P3 | test/lib/tiler/widgets/image_test.rb | RESOLVED | T-020a — explicit nil test |
 | F-018: theoretical Turbo-morph timer leak (same as pre-existing clock widget) | P3 | app/views/tiler/widgets/{_comments,_clock}.html.erb | DEFERRED | not a regression |
-| F-019: scheme allowlist case-sensitive — `HTTPS://` rejected vs RFC 3986 | P3 | lib/tiler/widgets/{image,comments}.rb | DEFERRED | rare in practice |
+| F-019: scheme allowlist case-sensitive — `HTTPS://` rejected vs RFC 3986 | P3 | lib/tiler/widgets/{image,comments}.rb | RESOLVED | T-019 — case-insensitive prefix |
 
 ## Resolution Plan Round 2
 

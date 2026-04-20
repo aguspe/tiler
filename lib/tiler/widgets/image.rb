@@ -4,7 +4,6 @@ module Tiler
   module Widgets
     class Image < Widget
       ALLOWED_FIT = %w[cover contain fill].freeze
-      ALLOWED_SCHEMES = %w[http:// https://].freeze
 
       self.type        = "image"
       self.partial     = "tiler/widgets/image"
@@ -22,8 +21,10 @@ module Tiler
       private
 
       def safe_url(u)
-        s = u.to_s
-        ALLOWED_SCHEMES.any? { |scheme| s.start_with?(scheme) } ? s : ""
+        s = u.to_s.strip
+        return nil if s.empty?
+        prefix = s[0, 8].downcase
+        (prefix.start_with?("http://") || prefix.start_with?("https://")) ? s : nil
       end
 
       def safe_fit(f)

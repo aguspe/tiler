@@ -1,6 +1,6 @@
 ---
 created: 2026-04-19T00:00:00Z
-last_edited: 2026-04-19T18:00:00Z
+last_edited: 2026-04-20T00:00:00Z
 ---
 
 # Cavekit: Widgets — Smashing Parity
@@ -27,7 +27,7 @@ Adds three new built-in widgets to the Tiler engine — `image`, `meter`, and `c
 - `fit` (optional, enum `cover` | `contain` | `fill`, default `contain`) — controls the image's CSS `object-fit` behavior so it scales to the panel.
 
 **Acceptance Criteria:**
-- [ ] `Tiler.widgets.lookup("image")` returns a registered widget class whose `type == "image"`, `label == "Image"`, `query_class == nil`, and `partial == "tiler/widgets/image"`.
+- [ ] `Tiler.widgets["image"]` returns a registered widget class whose `type == "image"`, `label == "Image"`, `query_class == nil`, and `partial == "tiler/widgets/image"`.
 - [ ] Instantiating the widget with `config = { "url" => "https://example.com/x.png", "alt" => "x", "fit" => "cover" }` and calling `#data` returns a hash containing `url`, `alt`, and `fit` with the supplied values.
 - [ ] When `config["fit"]` is missing or blank, `#data[:fit]` equals `"contain"`.
 - [ ] Rendering the partial `tiler/widgets/image` with a panel whose config has a non-blank `url` produces output containing exactly one `<img` tag whose `src` attribute equals `data[:url]`.
@@ -54,7 +54,7 @@ Adds three new built-in widgets to the Tiler engine — `image`, `meter`, and `c
 - `suffix` (optional, string) — text rendered after the value (e.g., `"%"`).
 
 **Acceptance Criteria:**
-- [ ] `Tiler.widgets.lookup("meter")` returns a registered widget class whose `type == "meter"`, `label == "Meter"`, `partial == "tiler/widgets/meter"`, and `query_class` is a subclass of `Tiler::Query::Base`.
+- [ ] `Tiler.widgets["meter"]` returns a registered widget class whose `type == "meter"`, `label == "Meter"`, `partial == "tiler/widgets/meter"`, and `query_class` is a subclass of `Tiler::Query::Base`.
 - [ ] Calling the query class's `#call` against a data source containing records with numeric `value_column` payloads returns a hash with exactly the keys `:value`, `:min`, `:max`, `:prefix`, `:suffix`.
 - [ ] The returned `:min` defaults to `0` when `config["min"]` is absent and equals the configured numeric value otherwise; `:max` equals the configured numeric value.
 - [ ] The returned `:value` is clamped into the inclusive range `[:min, :max]`: aggregated values below `:min` return `:min`; aggregated values above `:max` return `:max`; in-range values pass through unchanged.
@@ -82,7 +82,7 @@ Adds three new built-in widgets to the Tiler engine — `image`, `meter`, and `c
 - `rotate_seconds` (optional, integer, default `8`) — interval between rotations on the client.
 
 **Acceptance Criteria:**
-- [ ] `Tiler.widgets.lookup("comments")` returns a registered widget class whose `type == "comments"`, `label == "Comments"`, `partial == "tiler/widgets/comments"`, and `query_class` is a subclass of `Tiler::Query::Base`.
+- [ ] `Tiler.widgets["comments"]` returns a registered widget class whose `type == "comments"`, `label == "Comments"`, `partial == "tiler/widgets/comments"`, and `query_class` is a subclass of `Tiler::Query::Base`.
 - [ ] Calling the query class's `#call` returns a hash with at least the keys `:items` and `:rotate_seconds`.
 - [ ] `:items` is an `Array` of hashes; each item hash has exactly the keys `:quote`, `:name`, `:avatar`.
 - [ ] Items are ordered by `recorded_at` descending (newest first) and the array length is at most `config["limit"]` (defaulting to `10` when unset, clamped to a sane upper bound such as `100`).
@@ -230,3 +230,4 @@ Adds three new built-in widgets to the Tiler engine — `image`, `meter`, and `c
 - 2026-04-19: Added R8 (enum whitelist) — discovered during inspection, finding F-003 (CSS injection via `fit` attribute).
 - 2026-04-19: Added R9 (required-key error states) — discovered during inspection, findings F-004 (meter `max` silent) and F-005 (empty-quote pollution).
 - 2026-04-19: Added R10 (test tautology fixes) — discovered during inspection, findings F-006 and F-007.
+- 2026-04-20: Fixed kit prose — `Tiler.widgets.lookup` → `Tiler.widgets[...]` (registry has `[]`/`fetch`, not `lookup`). Closes F-009.

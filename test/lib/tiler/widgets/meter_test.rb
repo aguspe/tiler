@@ -136,6 +136,15 @@ module Tiler
         assert_equal 500.0, panel.data[:value]
       end
 
+      test "rendered SVG carries aria meter attrs" do
+        panel = panel_with(value_column: "value", aggregation: "last", max: 1000)
+        html = render_partial(panel)
+        assert_match(/role="img"/, html)
+        assert_match(/aria-valuemin=/, html)
+        assert_match(/aria-valuemax=/, html)
+        assert_match(/aria-valuenow=/, html)
+      end
+
       test "missing max renders configuration placeholder, not gauge" do
         panel = create_panel(@dash, widget_type: "meter", data_source: @source,
                              config: { value_column: "value", aggregation: "last" }.to_json)

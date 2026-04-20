@@ -120,6 +120,29 @@ module Tiler
         html = render_partial(panel)
         assert_equal 0, html.scan(/<img\b/).size
       end
+
+      test "url with leading whitespace is trimmed and accepted" do
+        panel = panel_with(url: "  https://example.com/x.png  ")
+        html = render_partial(panel)
+        assert_includes html, 'src="https://example.com/x.png"'
+      end
+
+      test "url with uppercase scheme is accepted (case-insensitive)" do
+        panel = panel_with(url: "HTTPS://example.com/x.png")
+        html = render_partial(panel)
+        assert_includes html, 'src="HTTPS://example.com/x.png"'
+      end
+
+      test "url returns nil when rejected (not empty string)" do
+        panel = panel_with(url: "javascript:alert(1)")
+        assert_nil panel.data[:url]
+      end
+
+      test "fit with nil value falls back to contain" do
+        panel = create_panel(@dash, widget_type: "image",
+                             config: { url: "https://example.com/x.png", fit: nil }.to_json)
+        assert_equal "contain", panel.data[:fit]
+      end
     end
   end
 end
