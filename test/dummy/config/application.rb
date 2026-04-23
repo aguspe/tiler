@@ -10,9 +10,10 @@ module Dummy
   class Application < Rails::Application
     config.load_defaults Rails::VERSION::STRING.to_f
 
-    # Make engine migrations discoverable to the dummy app so `bin/rails db:migrate`
-    # picks up `db/migrate/*` from the engine root without manual stamping or mirroring.
-    config.paths["db/migrate"] << File.expand_path("../../../db/migrate", __dir__)
+    # Engine migrations are auto-appended to the dummy app's path by the Tiler engine
+    # railtie when booting via the engine's bin/rails (ENGINE_PATH set in bin/rails).
+    # No manual append needed — adding it here would cause "Duplicate migration"
+    # errors during db:schema:load because the same path would be scanned twice.
 
     # For compatibility with applications that use this config
     config.action_controller.include_all_helpers = false

@@ -59,7 +59,9 @@ jobs:
       - name: Prepare test DB
         env:
           RAILS_ENV: test
-        run: bin/rails db:test:prepare
+        working-directory: test/dummy
+        run: |
+          bundle exec rails db:drop db:create db:migrate
 
       - name: Run unit + controller tests
         env:
