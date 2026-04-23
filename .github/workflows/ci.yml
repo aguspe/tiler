@@ -54,7 +54,7 @@ jobs:
           bundler-cache: true
 
       - name: Install Chrome for system tests
-        uses: browser-actions/setup-chrome@v1
+        uses: browser-actions/setup-chrome@v2
 
       - name: Prepare test DB
         env:
@@ -92,7 +92,7 @@ jobs:
           bundler-cache: true
 
       - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
+        uses: browser-actions/setup-chrome@v2
 
       - name: Boot Tiler dummy app + seed
         env:
