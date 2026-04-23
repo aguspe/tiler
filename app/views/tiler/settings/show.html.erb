@@ -7,32 +7,65 @@
 <p class="tiler-muted">Per-dashboard preferences. Changes save instantly via the Tiler API.</p>
 
 <section class="tiler-settings-section">
-  <h2 class="t-h2">TV mode</h2>
-  <p class="tiler-muted">When TV mode is on, the dashboard hides the navigation, header, and About panel — only the grid renders. Useful for wall-mounted displays.</p>
+  <h2 class="t-h2">Personalization</h2>
+  <p class="tiler-muted">Pick a background color and a logo URL (PNG / JPG / SVG hosted over HTTPS) shown on each dashboard.</p>
 
   <% if @dashboards.empty? %>
     <p class="tiler-muted">No dashboards yet. <%= link_to "Create one", new_dashboard_path, class: "tiler-link" %>.</p>
   <% else %>
     <ul class="tiler-settings-dashboards">
       <% @dashboards.each do |dash| %>
-        <li class="tiler-settings-dashboards-item">
-          <div>
-            <strong><%= dash.name %></strong>
-            <span class="tiler-muted">— <%= link_to "view", dashboard_path(dash.slug), class: "tiler-link" %></span>
+        <% url = settings_api_v1_dashboard_path(dash.slug) %>
+        <li class="tiler-settings-dashboards-item tiler-settings-dashboards-item-stack">
+          <div class="tiler-settings-dashboards-row">
+            <div>
+              <strong><%= dash.name %></strong>
+              <span class="tiler-muted">— <%= link_to "view", dashboard_path(dash.slug), class: "tiler-link" %></span>
+            </div>
+            <label class="tiler-toggle">
+              <input type="checkbox"
+                     data-tiler-tv-toggle
+                     data-dashboard-slug="<%= dash.slug %>"
+                     data-controller="tiler--tv-toggle"
+                     data-tiler--tv-toggle-url-value="<%= url %>"
+                     data-tiler--tv-toggle-csrf-value="<%= form_authenticity_token %>"
+                     data-action="change->tiler--tv-toggle#change"
+                     <%= "checked" if dash.tv_mode? %>>
+              <span>TV mode</span>
+            </label>
           </div>
-          <label class="tiler-toggle">
-            <input type="checkbox"
-                   data-tiler-tv-toggle
-                   data-dashboard-slug="<%= dash.slug %>"
-                   data-controller="tiler--tv-toggle"
-                   data-tiler--tv-toggle-url-value="<%= settings_api_v1_dashboard_path(dash.slug) %>"
-                   data-tiler--tv-toggle-csrf-value="<%= form_authenticity_token %>"
-                   data-action="change->tiler--tv-toggle#change"
-                   <%= "checked" if dash.tv_mode? %>>
-            <span>TV mode</span>
-          </label>
+          <div class="tiler-settings-personalization-row">
+            <label class="tiler-field-inline">
+              <span>Background</span>
+              <input type="color"
+                     value="<%= dash.background_color || '#f5f4ee' %>"
+                     data-tiler-bg-color
+                     data-controller="tiler--settings-input"
+                     data-tiler--settings-input-url-value="<%= url %>"
+                     data-tiler--settings-input-csrf-value="<%= form_authenticity_token %>"
+                     data-tiler--settings-input-key-value="background_color"
+                     data-action="input->tiler--settings-input#change">
+            </label>
+            <label class="tiler-field-inline tiler-field-inline-stretch">
+              <span>Logo URL (https)</span>
+              <input type="url"
+                     placeholder="https://example.com/logo.png"
+                     value="<%= dash.logo_url %>"
+                     data-tiler-logo-url
+                     data-controller="tiler--settings-input"
+                     data-tiler--settings-input-url-value="<%= url %>"
+                     data-tiler--settings-input-csrf-value="<%= form_authenticity_token %>"
+                     data-tiler--settings-input-key-value="logo_url"
+                     data-action="input->tiler--settings-input#change">
+            </label>
+          </div>
         </li>
       <% end %>
     </ul>
   <% end %>
+</section>
+
+<section class="tiler-settings-section">
+  <h2 class="t-h2">TV mode</h2>
+  <p class="tiler-muted">When TV mode is on, the dashboard hides the navigation, header, and About panel — only the grid renders. Useful for wall-mounted displays. Toggle next to each dashboard above.</p>
 </section>

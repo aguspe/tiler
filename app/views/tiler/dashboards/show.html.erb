@@ -19,12 +19,32 @@
      data-tiler--dashboard-grid-panels-url-value="<%= dashboard_panels_path(@dashboard) %>"
      data-tiler--dashboard-grid-csrf-value="<%= form_authenticity_token %>"
      data-tiler--dashboard-grid-refresh-seconds-value="<%= @dashboard.refresh_seconds %>"
-     data-tiler--dashboard-grid-disable-polling-value="<%= Tiler.configuration.disable_polling %>">
+     data-tiler--dashboard-grid-disable-polling-value="<%= Tiler.configuration.disable_polling %>"
+     <% if @dashboard.background_color %>style="--paper: <%= @dashboard.background_color %>; background: <%= @dashboard.background_color %>;"<% end %>>
   <%= turbo_stream_from @dashboard %>
   <% unless @tv_mode %>
     <div class="tiler-page-header">
+      <% if @dashboard.logo_url %>
+        <img class="tiler-page-header-logo"
+             src="<%= @dashboard.logo_url %>"
+             alt="<%= @dashboard.name %> logo"
+             data-tiler-dashboard-logo
+             referrerpolicy="no-referrer"
+             loading="lazy">
+      <% end %>
       <div>
-        <h1><%= @dashboard.name %></h1>
+        <h1 class="tiler-dashboard-title"
+            data-tiler-dashboard-title
+            data-controller="tiler--inline-edit"
+            data-tiler--inline-edit-url-value="<%= api_v1_dashboard_path(@dashboard.slug, format: :json) %>"
+            data-tiler--inline-edit-csrf-value="<%= form_authenticity_token %>"
+            data-tiler--inline-edit-field-value="name"
+            data-tiler--inline-edit-resource-value="dashboard"
+            data-action="dblclick->tiler--inline-edit#edit
+                         keydown->tiler--inline-edit#onKey
+                         blur->tiler--inline-edit#save"
+            title="Double-click to rename"
+            tabindex="0"><%= @dashboard.name %></h1>
         <% if @dashboard.description.present? %>
           <p class="tiler-muted"><%= @dashboard.description %></p>
         <% end %>

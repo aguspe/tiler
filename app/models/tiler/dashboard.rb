@@ -38,6 +38,26 @@ module Tiler
       !!settings_hash["tv_mode"]
     end
 
+    # Personalization (per-dashboard, persisted in settings JSON):
+    #   background_color: "#rrggbb" / "#rgb" — applied to the dashboard's
+    #   --paper token via inline style. Invalid input returns nil so the
+    #   layout falls back to the design system default.
+    HEX_COLOR_RE = /\A#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})\z/i
+
+    def background_color
+      c = settings_hash["background_color"].to_s.strip
+      c.match?(HEX_COLOR_RE) ? c : nil
+    end
+
+    # logo_url: http(s) URL only — rejected when scheme is anything else
+    # (javascript:, data:, file:, etc.) so we never render an unsafe <img src>.
+    def logo_url
+      u = settings_hash["logo_url"].to_s.strip
+      return nil if u.empty?
+      prefix = u[0, 8].downcase
+      (prefix.start_with?("http://") || prefix.start_with?("https://")) ? u : nil
+    end
+
     private
 
     def generate_slug
