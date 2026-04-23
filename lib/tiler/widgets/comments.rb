@@ -15,7 +15,7 @@ module Tiler
 
         items =
           if quote_col.present? && safe_col?(quote_col)
-            cols = [Arel.sql(json_extract(quote_col))]
+            cols = [ Arel.sql(json_extract(quote_col)) ]
             cols << (name_col.present? && safe_col?(name_col) ? Arel.sql(json_extract(name_col)) : Arel.sql("NULL"))
             cols << (avatar_col.present? && safe_col?(avatar_col) ? Arel.sql(json_extract(avatar_col)) : Arel.sql("NULL"))
 

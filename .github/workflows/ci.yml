@@ -56,10 +56,15 @@ jobs:
       - name: Install Chrome for system tests
         uses: browser-actions/setup-chrome@v1
 
+      - name: Prepare test DB
+        env:
+          RAILS_ENV: test
+        run: bin/rails db:test:prepare
+
       - name: Run unit + controller tests
         env:
           RAILS_ENV: test
-        run: bin/rails db:test:prepare test
+        run: bin/rails test
 
       - name: Run system tests (headless Chrome)
         env:

@@ -6,7 +6,7 @@ module Tiler
       @widgets = {}
     end
 
-    def register(type, klass: nil, partial: nil, label: nil, query: nil, col_spans: [1, 2])
+    def register(type, klass: nil, partial: nil, label: nil, query: nil, col_spans: [ 1, 2 ])
       type = type.to_s
       klass ||= build_anonymous(type, partial:, label:, query:, col_spans:)
       @widgets[type] = klass

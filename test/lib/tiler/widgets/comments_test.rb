@@ -113,7 +113,7 @@ module Tiler
         panel = panel_with(quote_column: "quote", name_column: "author",
                            avatar_column: "pic")
         html = render_partial(panel)
-        ["First", "Second", "Third (no name)", "Fourth (no avatar)"].each do |q|
+        [ "First", "Second", "Third (no name)", "Fourth (no avatar)" ].each do |q|
           assert_includes html, q
         end
       end
@@ -224,7 +224,7 @@ module Tiler
                              config: { quote_column: "quote", name_column: "author" }.to_json)
         items = panel.data[:items]
         quotes = items.map { |i| i[:quote] }
-        assert_equal ["Real"], quotes
+        assert_equal [ "Real" ], quotes
       end
 
       test "empty data source partial render does not raise" do
