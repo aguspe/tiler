@@ -73,6 +73,13 @@ module Tiler
         end
       end
 
+      # update_columns bypasses callbacks → Panel#broadcasts_to does NOT fire.
+      # Trigger a single morph-style refresh so other dashboard viewers pick up
+      # the new layout. Uses turbo-rails' broadcast_refresh_to (Turbo 8 morph).
+      if applied.positive?
+        Turbo::StreamsChannel.broadcast_refresh_to(@dashboard)
+      end
+
       render json: { applied: applied, skipped: skipped }, status: :ok
     end
 

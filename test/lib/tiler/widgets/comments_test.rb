@@ -140,11 +140,16 @@ module Tiler
         assert_equal 1, html.scan(/class="[^"]*\btiler-comment-active\b[^"]*"/).size
       end
 
-      test "rotator script gates with dataset flag" do
+      test "rotator wires Stimulus controller exactly once per partial" do
         panel = panel_with(quote_column: "quote")
         html = render_partial(panel)
-        assert_includes html, "tilerCommentsStarted"
-        assert_equal 1, html.scan(/setInterval\(/).size
+        # Stimulus replaces the old inline IIFE / dataset-flag idempotency guard.
+        # The framework itself guarantees connect() runs exactly once per
+        # element, so we assert the controller binding and per-item targets
+        # are emitted instead of inspecting raw <script> output.
+        assert_equal 1, html.scan(/data-controller="tiler--comments-rotator"/).size
+        assert_match(/data-tiler--comments-rotator-interval-value="\d+"/, html)
+        assert_operator html.scan(/data-tiler--comments-rotator-target="item"/).size, :>=, 2
       end
 
       test "avatar with javascript: scheme is dropped" do

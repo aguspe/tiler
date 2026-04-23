@@ -1,3 +1,7 @@
+<% # `data` may not be passed (e.g. when this partial is rendered by Turbo's
+   # broadcasts_to callback). Fall back to computing it from the widget so the
+   # partial is safe to render in any context. %>
+<% data = local_assigns.key?(:data) ? local_assigns[:data] : panel.data %>
 <%= turbo_frame_tag "tiler_panel_#{panel.id}" do %>
   <div class="tiler-panel">
     <div class="tiler-panel-header">

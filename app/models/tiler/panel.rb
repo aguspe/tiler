@@ -5,6 +5,10 @@ module Tiler
     belongs_to :dashboard,   class_name: "Tiler::Dashboard",  foreign_key: :tiler_dashboard_id
     belongs_to :data_source, class_name: "Tiler::DataSource", foreign_key: :tiler_data_source_id, optional: true
 
+    # Real-time updates: broadcast panel CRUD events to the dashboard's Turbo Stream channel.
+    # Host apps that opt in via <%= turbo_stream_from @dashboard %> get live updates without polling.
+    broadcasts_to ->(panel) { panel.dashboard }, inserts_by: :append
+
     validates :title,       presence: true
     validates :widget_type, presence: true
     validates :width,       inclusion: { in: 1..12 }

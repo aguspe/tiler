@@ -31,7 +31,19 @@ module Tiler
     initializer "tiler.assets" do |app|
       if app.config.respond_to?(:assets)
         app.config.assets.paths << root.join("app/assets/stylesheets")
+        app.config.assets.paths << root.join("app/javascript")
         app.config.assets.precompile += %w[tiler/application.css]
+      end
+    end
+
+    # Pin the engine's Stimulus controllers into the host app's importmap so
+    # the inline IIFEs we replaced (clock, comments rotator, dashboard grid)
+    # resolve at runtime. Host apps using importmap will see these controllers
+    # under the "controllers/tiler/*" namespace.
+    initializer "tiler.importmap", before: "importmap" do |app|
+      if app.respond_to?(:config) && app.config.respond_to?(:importmap)
+        app.config.importmap.paths << root.join("config/importmap.rb") if root.join("config/importmap.rb").exist?
+        app.config.importmap.cache_sweepers << root.join("app/javascript/controllers/tiler")
       end
     end
   end

@@ -1,26 +1,9 @@
-<div class="tiler-clock" data-tiler-clock data-format="<%= data[:format] %>">
-  <div class="tiler-clock-time">--:--</div>
-  <div class="tiler-clock-date">&nbsp;</div>
+<div class="tiler-clock"
+     data-tiler-clock
+     data-format="<%= data[:format] %>"
+     data-controller="tiler--clock"
+     data-tiler--clock-format-value="<%= data[:format] %>"
+     <% if data[:timezone].present? %>data-tiler--clock-timezone-value="<%= data[:timezone] %>"<% end %>>
+  <div class="tiler-clock-time" data-tiler--clock-target="time">--:--</div>
+  <div class="tiler-clock-date" data-tiler--clock-target="date">&nbsp;</div>
 </div>
-<script>
-  (function() {
-    const el = document.currentScript.previousElementSibling;
-    if (!el || !el.matches('[data-tiler-clock]')) return;
-    const timeEl = el.querySelector('.tiler-clock-time');
-    const dateEl = el.querySelector('.tiler-clock-date');
-    const fmt = el.dataset.format || '24h';
-    function tick() {
-      const now = new Date();
-      let h = now.getHours(), m = now.getMinutes().toString().padStart(2,'0'), s = now.getSeconds().toString().padStart(2,'0');
-      let suffix = '';
-      if (fmt === '12h') { suffix = h >= 12 ? ' PM' : ' AM'; h = h % 12 || 12; }
-      timeEl.textContent = `${h.toString().padStart(2,'0')}:${m}:${s}${suffix}`;
-      dateEl.textContent = now.toLocaleDateString(undefined, { weekday:'long', month:'short', day:'numeric' });
-    }
-    tick();
-    if (!el.dataset.tilerClockStarted) {
-      el.dataset.tilerClockStarted = '1';
-      setInterval(tick, 1000);
-    }
-  })();
-</script>

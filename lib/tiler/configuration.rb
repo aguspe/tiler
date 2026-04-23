@@ -8,7 +8,8 @@ module Tiler
                   :current_user_method,
                   :webhook_token_header,
                   :default_refresh_seconds,
-                  :eager_panel_load
+                  :eager_panel_load,
+                  :disable_polling
 
     def initialize
       @parent_controller       = "::ApplicationController"
@@ -20,6 +21,11 @@ module Tiler
       @webhook_token_header    = "X-Tiler-Token"
       @default_refresh_seconds = 0
       @eager_panel_load        = false
+      # When true, the dashboard grid Stimulus controller will NOT start the
+      # polling refresh interval — Turbo Streams broadcasts (broadcasts_to on
+      # Tiler::Panel + turbo_stream_from in show.html.erb) handle live updates.
+      # Leave false on hosts without ActionCable/Redis configured.
+      @disable_polling         = false
     end
   end
 end

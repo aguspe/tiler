@@ -1,195 +1,88 @@
 <% content_for :title, @dashboard.name %>
 
-<div class="tiler-page-header">
-  <div>
-    <h1><%= @dashboard.name %></h1>
-    <% if @dashboard.description.present? %>
-      <p class="tiler-muted"><%= @dashboard.description %></p>
-    <% end %>
-  </div>
-  <div>
-    <button type="button" class="tiler-btn" data-tiler-toggle-edit>Edit Layout</button>
-    <%= link_to "Add Panel", new_dashboard_panel_path(@dashboard), class: "tiler-btn" %>
-    <%= link_to "Edit", edit_dashboard_path(@dashboard), class: "tiler-btn" %>
-  </div>
-</div>
-
-<% panels = @dashboard.panels %>
-
-<% if panels.empty? %>
-  <div class="tiler-empty">
-    <p>No panels yet.</p>
-    <%= link_to "Add your first panel", new_dashboard_panel_path(@dashboard),
-          class: "tiler-btn tiler-btn-primary" %>
-  </div>
-<% else %>
-  <div class="tiler-dashboard-shell">
-    <aside class="tiler-widget-palette" data-tiler-palette aria-label="Widget palette">
-      <h4 class="tiler-widget-palette-title">Widgets</h4>
-      <ul class="tiler-widget-palette-list">
-        <% Tiler.widgets.each do |type, klass| %>
-          <li class="tiler-widget-palette-item"
-              data-tiler-palette-widget
-              data-widget-type="<%= type %>"
-              data-default-w="<%= klass.default_size[:w] || klass.default_size["w"] %>"
-              data-default-h="<%= klass.default_size[:h] || klass.default_size["h"] %>"
-              data-default-config="<%= klass.default_config.to_json %>"
-              draggable="true"
-              tabindex="0">
-            <span class="tiler-widget-palette-label"><%= klass.label %></span>
-          </li>
-        <% end %>
-      </ul>
-    </aside>
-
-    <div id="tiler-grid-stack-<%= @dashboard.id %>" class="grid-stack tiler-grid-stack"
-         data-tiler-dashboard-id="<%= @dashboard.id %>"
-         data-tiler-layout-url="<%= layout_dashboard_path(@dashboard) %>"
-         data-tiler-csrf="<%= form_authenticity_token %>"
-         <% if @dashboard.refresh_seconds > 0 %>
-           data-tiler-refresh="<%= @dashboard.refresh_seconds %>"
-         <% end %>>
-      <% panels.each do |panel| %>
-        <div class="grid-stack-item"
-             gs-id="<%= panel.id %>"
-             gs-x="<%= panel.x %>"
-             gs-y="<%= panel.y %>"
-             gs-w="<%= panel.width %>"
-             gs-h="<%= panel.height %>">
-          <div class="grid-stack-item-content">
-            <%= turbo_frame_tag "tiler_panel_#{panel.id}",
-                  src: preview_dashboard_panel_path(@dashboard, panel),
-                  loading: (Tiler.configuration.eager_panel_load ? :eager : :lazy) do %>
-              <div class="tiler-skeleton">
-                <div class="tiler-skeleton-title"></div>
-                <div class="tiler-skeleton-body"></div>
-              </div>
-            <% end %>
-          </div>
-        </div>
+<div class="tiler-dashboard"
+     data-controller="tiler--dashboard-grid"
+     data-tiler--dashboard-grid-layout-url-value="<%= layout_dashboard_path(@dashboard) %>"
+     data-tiler--dashboard-grid-panels-url-value="<%= dashboard_panels_path(@dashboard) %>"
+     data-tiler--dashboard-grid-csrf-value="<%= form_authenticity_token %>"
+     data-tiler--dashboard-grid-refresh-seconds-value="<%= @dashboard.refresh_seconds %>"
+     data-tiler--dashboard-grid-disable-polling-value="<%= Tiler.configuration.disable_polling %>">
+  <%= turbo_stream_from @dashboard %>
+  <div class="tiler-page-header">
+    <div>
+      <h1><%= @dashboard.name %></h1>
+      <% if @dashboard.description.present? %>
+        <p class="tiler-muted"><%= @dashboard.description %></p>
       <% end %>
+    </div>
+    <div>
+      <button type="button"
+              class="tiler-btn"
+              data-tiler-toggle-edit
+              data-tiler--dashboard-grid-target="toggle"
+              data-action="click->tiler--dashboard-grid#toggle">Edit Layout</button>
+      <%= link_to "Add Panel", new_dashboard_panel_path(@dashboard), class: "tiler-btn" %>
+      <%= link_to "Edit", edit_dashboard_path(@dashboard), class: "tiler-btn" %>
     </div>
   </div>
 
-  <script>
-    (function() {
-      const el = document.querySelector('.tiler-grid-stack');
-      if (!el || !window.GridStack) return;
+  <% panels = @dashboard.panels %>
 
-      const grid = GridStack.init({
-        column: 12,
-        cellHeight: 90,
-        margin: 0,
-        staticGrid: true,
-        float: true,
-        handle: '.tiler-panel-header',
-        acceptWidgets: true
-      }, el);
+  <% if panels.empty? %>
+    <div class="tiler-empty">
+      <p>No panels yet.</p>
+      <%= link_to "Add your first panel", new_dashboard_panel_path(@dashboard),
+            class: "tiler-btn tiler-btn-primary" %>
+    </div>
+  <% else %>
+    <div class="tiler-dashboard-shell" data-tiler--dashboard-grid-target="shell">
+      <aside class="tiler-widget-palette" data-tiler-palette aria-label="Widget palette">
+        <h4 class="tiler-widget-palette-title">Widgets</h4>
+        <ul class="tiler-widget-palette-list">
+          <% Tiler.widgets.each do |type, klass| %>
+            <li class="tiler-widget-palette-item"
+                data-tiler-palette-widget
+                data-widget-type="<%= type %>"
+                data-default-w="<%= klass.default_size[:w] || klass.default_size["w"] %>"
+                data-default-h="<%= klass.default_size[:h] || klass.default_size["h"] %>"
+                data-default-config="<%= klass.default_config.to_json %>"
+                draggable="true"
+                tabindex="0">
+              <span class="tiler-widget-palette-label"><%= klass.label %></span>
+            </li>
+          <% end %>
+        </ul>
+      </aside>
 
-      // Wire palette drag-in (cavekit-widget-palette-drag-drop R3).
-      // setupDragIn is the gridstack v8+ API (engine vendors v10.3.1 — see layout HTML).
-      if (typeof GridStack.setupDragIn === 'function') {
-        GridStack.setupDragIn('.tiler-widget-palette-item', { appendTo: 'body', helper: 'clone' });
-      }
-
-      grid.on('dropped', function(_event, _previousNode, newNode) {
-        if (!newNode || !newNode.el) return;
-        var src = newNode.el;
-        // Read data attributes from the dropped element (gridstack copies attributes from the
-        // cloned helper, which carries the source palette tile's data-* attrs).
-        var widgetType = src.getAttribute('data-widget-type');
-        if (!widgetType) {
-          // Not a palette drop (likely an existing-panel move from another grid). Bail.
-          return;
-        }
-        var defaultConfig = src.getAttribute('data-default-config') || '{}';
-        var labelEl = src.querySelector('.tiler-widget-palette-label');
-        var title = labelEl ? labelEl.textContent.trim() : widgetType;
-
-        // Remove the placeholder gridstack created — the turbo_stream response will append
-        // the real tile bound to the persisted panel record.
-        grid.removeWidget(src, false, false);
-
-        var formData = new FormData();
-        formData.append('panel[widget_type]', widgetType);
-        formData.append('panel[title]', title);
-        formData.append('panel[x]', newNode.x);
-        formData.append('panel[y]', newNode.y);
-        formData.append('panel[width]', newNode.w);
-        formData.append('panel[height]', newNode.h);
-        formData.append('panel[config]', defaultConfig);
-
-        fetch(<%= raw dashboard_panels_path(@dashboard).to_json %>, {
-          method: 'POST',
-          headers: {
-            'X-CSRF-Token': el.dataset.tilerCsrf,
-            'Accept': 'text/vnd.turbo-stream.html'
-          },
-          body: formData,
-          credentials: 'same-origin'
-        }).then(function(res) {
-          if (!res.ok) {
-            console.warn('Tiler: panel create failed (' + res.status + ')');
-            return;
-          }
-          return res.text().then(function(html) {
-            if (typeof Turbo !== 'undefined' && Turbo.renderStreamMessage) {
-              Turbo.renderStreamMessage(html);
-            }
-            // After Turbo appends the new tile, ask gridstack to hydrate it so it
-            // participates in subsequent move/resize events.
-            setTimeout(function() {
-              var newItems = el.querySelectorAll('.grid-stack-item:not(.gs-w)');
-              newItems.forEach(function(item) {
-                if (!item.gridstackNode) {
-                  grid.makeWidget(item);
-                }
-              });
-            }, 100);
-          });
-        }).catch(function(err) {
-          console.warn('Tiler: panel create error', err);
-        });
-      });
-
-      const toggle = document.querySelector('[data-tiler-toggle-edit]');
-      let editing = false;
-      function setEditing(on) {
-        editing = on;
-        grid.setStatic(!on);
-        grid.enableMove(on);
-        grid.enableResize(on);
-        el.classList.toggle('tiler-editing', on);
-        document.querySelector('.tiler-dashboard-shell')?.classList.toggle('tiler-editing-mode', on);
-        if (toggle) {
-          toggle.textContent = on ? 'Done Editing' : 'Edit Layout';
-          toggle.classList.toggle('tiler-btn-primary', on);
-        }
-      }
-      if (toggle) toggle.addEventListener('click', function() { setEditing(!editing); });
-
-      grid.on('change', function(_event, items) {
-        const payload = { items: items.map(function(i) {
-          return { id: i.el.getAttribute('gs-id'), x: i.x, y: i.y, w: i.w, h: i.h };
-        })};
-        fetch(el.dataset.tilerLayoutUrl, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': el.dataset.tilerCsrf,
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(payload),
-          credentials: 'same-origin'
-        });
-      });
-
-      const refreshSecs = parseInt(el.dataset.tilerRefresh, 10);
-      if (refreshSecs > 0) {
-        setInterval(function() {
-          el.querySelectorAll('turbo-frame').forEach(function(f) { f.reload(); });
-        }, refreshSecs * 1000);
-      }
-    })();
-  </script>
-<% end %>
+      <div id="tiler-grid-stack-<%= @dashboard.id %>" class="grid-stack tiler-grid-stack"
+           data-tiler-dashboard-id="<%= @dashboard.id %>"
+           data-tiler-layout-url="<%= layout_dashboard_path(@dashboard) %>"
+           data-tiler-csrf="<%= form_authenticity_token %>"
+           data-tiler-panels-url="<%= dashboard_panels_path(@dashboard) %>"
+           data-tiler--dashboard-grid-target="grid"
+           <% if @dashboard.refresh_seconds > 0 %>
+             data-tiler-refresh="<%= @dashboard.refresh_seconds %>"
+           <% end %>>
+        <% panels.each do |panel| %>
+          <div class="grid-stack-item"
+               gs-id="<%= panel.id %>"
+               gs-x="<%= panel.x %>"
+               gs-y="<%= panel.y %>"
+               gs-w="<%= panel.width %>"
+               gs-h="<%= panel.height %>">
+            <div class="grid-stack-item-content">
+              <%= turbo_frame_tag "tiler_panel_#{panel.id}",
+                    src: preview_dashboard_panel_path(@dashboard, panel),
+                    loading: (Tiler.configuration.eager_panel_load ? :eager : :lazy) do %>
+                <div class="tiler-skeleton">
+                  <div class="tiler-skeleton-title"></div>
+                  <div class="tiler-skeleton-body"></div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
