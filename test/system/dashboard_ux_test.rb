@@ -18,7 +18,7 @@ module Tiler
                           x: 0, y: 0, width: 4, height: 2, config: {}.to_json)
       @bottom = create_panel(@dash, title: "Bottom", widget_type: "text",
                              x: 0, y: 6, width: 4, height: 2,
-                             config: { text: "bottom" }.to_json)
+                             config: { body: "bottom" }.to_json)
     end
 
     test "issue #1: dashboard does not apply tiler-editing class to grid by default" do

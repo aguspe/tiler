@@ -18,12 +18,24 @@ module Tiler
         klass = Tiler.widgets[type]
         config_default = klass.default_config.dup
         case type
-        when "metric", "number_with_delta", "bar_chart", "line_chart"
+        when "metric", "number_with_delta"
           config_default["aggregation"] ||= "count"
-          config_default["bucket"] ||= "day" if type == "line_chart"
-        when "pie_chart", "list"
-          config_default["group_by"] ||= "status"
+        when "line_chart"
+          config_default["bucket"] ||= "1d"
+          config_default["series"] ||= [ { label: "duration", column: "duration", agg: "avg" } ]
+        when "bar_chart"
           config_default["aggregation"] ||= "count"
+          config_default["group_column"] ||= "status"
+          config_default["value_column"] ||= "duration"
+        when "pie_chart"
+          config_default["group_column"] ||= "status"
+          config_default["aggregation"] ||= "count"
+        when "list"
+          config_default["label_column"] ||= "status"
+          config_default["aggregation"] ||= "count"
+        when "status_grid"
+          config_default["group_column"] ||= "status"
+          config_default["status_column"] ||= "status"
         when "table"
           config_default["limit"] ||= 5
         end

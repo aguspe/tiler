@@ -7,11 +7,15 @@ module Tiler
       self.partial     = "tiler/widgets/text"
       self.label       = "Text"
       self.query_class = nil
-      self.default_config = { "text" => "Edit me", "size" => "md" }
-      self.default_size   = { w: 4, h: 2 }
+      ALLOWED_ALIGN = %w[left center].freeze
+
+      self.default_config = { "body" => "Edit me", "align" => "left" }
+      self.default_size   = { w: 4, h: 3 }
 
       def data
-        { text: config["text"].to_s, size: config["size"] || "md" }
+        align = config["align"].to_s
+        align = "left" unless ALLOWED_ALIGN.include?(align)
+        { body: config["body"].to_s, align: align }
       end
     end
   end

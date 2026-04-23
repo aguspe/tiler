@@ -1,17 +1,32 @@
-<% if data[:rows].empty? %>
+<% if data[:rows].blank? %>
   <p class="tiler-muted">No records.</p>
 <% else %>
   <div class="tiler-table-scroll">
     <table class="tiler-table">
-      <thead><tr><% data[:columns].each do |c| %><th><%= c.to_s.humanize %></th><% end %></tr></thead>
+      <thead>
+        <tr>
+          <% data[:columns].each do |c| %>
+            <% c = c.is_a?(Hash) ? c.transform_keys(&:to_sym) : { label: c.to_s.humanize, num: false } %>
+            <th class="<%= 'tiler-table-num' if c[:num] %>"><%= c[:label] %></th>
+          <% end %>
+        </tr>
+      </thead>
       <tbody>
         <% data[:rows].each do |row| %>
-          <tr><% row.each do |cell| %><td><%= cell %></td><% end %></tr>
+          <tr>
+            <% row.each_with_index do |cell, i| %>
+              <% c = data[:columns][i] %>
+              <% c = c.is_a?(Hash) ? c.transform_keys(&:to_sym) : { num: false } %>
+              <td class="<%= 'tiler-table-num' if c[:num] %>"><%= cell %></td>
+            <% end %>
+          </tr>
         <% end %>
       </tbody>
     </table>
   </div>
-  <p class="tiler-muted tiler-table-footer">
-    Showing <%= data[:rows].size %> of <%= number_with_delimiter(data[:total]) %>.
-  </p>
+  <% if data[:total].to_i > data[:rows].size %>
+    <p class="tiler-muted tiler-table-footer">
+      Showing <%= data[:rows].size %> of <%= number_with_delimiter(data[:total]) %>.
+    </p>
+  <% end %>
 <% end %>

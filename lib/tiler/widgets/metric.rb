@@ -6,14 +6,14 @@ module Tiler
     class MetricQuery < Query::Base
       def call
         col = config["value_column"]
-        agg = config["aggregation"] || "count"
+        agg = config["aggregation"] || "last"
         {
-          value:          aggregate(base_scope, col, agg),
-          label:          config["label"] || panel.title,
-          threshold_warn: config["threshold_warn"],
-          threshold_crit: config["threshold_crit"],
-          aggregation:    agg,
-          time_window:    config["time_window"]
+          value:       aggregate(base_scope, col, agg),
+          label:       panel.title,
+          prefix:      config["prefix"].to_s,
+          suffix:      config["suffix"].to_s,
+          aggregation: agg,
+          time_window: config["time_window"]
         }
       end
     end
@@ -23,12 +23,13 @@ module Tiler
       self.partial     = "tiler/widgets/metric"
       self.label       = "Single Metric"
       self.query_class = MetricQuery
-      self.default_config = { "aggregation" => "count" }
+      self.default_config = { "aggregation" => "last", "time_window" => "24h" }
       self.default_size   = { w: 3, h: 2 }
 
       # Defer to Tiler::Widget#empty? — empty when no data_source AND no preview.
       def self.example_config
-        { "aggregation" => "avg", "value_column" => "duration", "time_window" => "24h" }
+        { "aggregation" => "avg", "value_column" => "duration",
+          "time_window" => "24h", "suffix" => "ms" }
       end
 
       def self.example_payload
@@ -36,7 +37,9 @@ module Tiler
       end
 
       def self.example_preview
-        { "value" => 142, "label" => "Sample metric", "aggregation" => "avg", "time_window" => "24h" }
+        { "value" => 142, "label" => "Sample metric",
+          "prefix" => "", "suffix" => "ms",
+          "aggregation" => "avg", "time_window" => "24h" }
       end
     end
   end

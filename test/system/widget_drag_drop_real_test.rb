@@ -15,7 +15,7 @@ module Tiler
                             x: 0, y: 0, width: 3, height: 2, config: {}.to_json)
       create_panel(@dash, title: "Other", widget_type: "text",
                    x: 6, y: 0, width: 3, height: 2,
-                   config: { text: "neighbor" }.to_json)
+                   config: { body: "neighbor" }.to_json)
     end
 
     test "gridstack initializes non-static so drag is enabled from page load" do

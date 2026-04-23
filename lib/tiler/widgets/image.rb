@@ -10,7 +10,7 @@ module Tiler
       self.label       = "Image"
       self.query_class = nil
       self.default_config = {}
-      self.default_size   = { w: 3, h: 3 }
+      self.default_size   = { w: 4, h: 3 }
 
       def data
         {

@@ -4,18 +4,23 @@ require "tiler/query/base"
 module Tiler
   module Widgets
     class LineChartQuery < Query::Base
+      VALID_BUCKETS = %w[1h 1d 1w].freeze
+      DEFAULT_BUCKET = "1d".freeze
+      DEFAULT_AGG    = "sum".freeze
+
       def call
-        y_cols = Array(config["y_columns"].presence || [ config["value_column"] ]).compact
-        agg    = config["aggregation"] || "sum"
-        bucket = config["bucket"] || "day"
+        series = parse_series(config["series"])
+        bucket = VALID_BUCKETS.include?(config["bucket"]) ? config["bucket"] : DEFAULT_BUCKET
+
+        return empty_result if series.empty?
 
         buckets = time_buckets(bucket)
         labels  = buckets.map { |b| format_label(b, bucket) }
 
-        datasets = y_cols.each_with_index.map do |col, i|
+        datasets = series.each_with_index.map do |s, i|
           color = chart_colors[i % chart_colors.size]
-          data  = buckets.map { |b| aggregate_for_bucket(b, bucket, col, agg) }
-          { label: col.humanize, data: data, borderColor: color,
+          data  = buckets.map { |b| aggregate_for_bucket(b, bucket, s[:column], s[:agg]) }
+          { label: s[:label], data: data, borderColor: color,
             backgroundColor: "#{color}33", tension: 0.3, fill: false, spanGaps: true }
         end
 
@@ -24,34 +29,54 @@ module Tiler
 
       private
 
+      def parse_series(raw)
+        Array(raw).filter_map do |s|
+          next unless s.is_a?(Hash) || s.respond_to?(:[])
+          column = s["column"] || s[:column]
+          next if column.blank? || !safe_col?(column)
+          {
+            label:  (s["label"] || s[:label] || column.to_s.humanize).to_s,
+            column: column.to_s,
+            agg:    (s["agg"] || s[:agg] || DEFAULT_AGG).to_s
+          }
+        end
+      end
+
       def time_buckets(bucket)
         return [] unless time_window_start
-        step = { "hour" => 1.hour, "day" => 1.day, "week" => 1.week }[bucket] || 1.day
-        t = bucket == "hour" ? time_window_start.beginning_of_hour : time_window_start.beginning_of_day
-        buckets = []
+        step = bucket_step(bucket)
+        t = bucket == "1h" ? time_window_start.beginning_of_hour : time_window_start.beginning_of_day
+        out = []
         while t < Time.current
-          buckets << t
+          out << t
           t += step
         end
-        buckets
+        out
+      end
+
+      def bucket_step(bucket)
+        case bucket
+        when "1h" then 1.hour
+        when "1w" then 1.week
+        else 1.day
+        end
       end
 
       def aggregate_for_bucket(start, bucket, col, agg)
-        stop = case bucket
-        when "hour" then start + 1.hour
-        when "week" then start + 1.week
-        else start + 1.day
-        end
-        scoped = apply_filters(source.data_records.where(recorded_at: start...stop))
+        scoped = apply_filters(source.data_records.where(recorded_at: start...(start + bucket_step(bucket))))
         aggregate(scoped, col, agg)
       end
 
       def format_label(t, bucket)
         case bucket
-        when "hour" then t.strftime("%m/%d %H:%M")
-        when "week" then "W#{t.strftime('%-W')} #{t.strftime('%b %-d')}"
+        when "1h" then t.strftime("%m/%d %H:%M")
+        when "1w" then "W#{t.strftime('%-W')} #{t.strftime('%b %-d')}"
         else t.strftime("%b %-d")
         end
+      end
+
+      def empty_result
+        { labels: [], datasets: [], options: {} }
       end
     end
 
@@ -60,8 +85,8 @@ module Tiler
       self.partial     = "tiler/widgets/line_chart"
       self.label       = "Line Chart"
       self.query_class = LineChartQuery
-      self.default_config = { "bucket" => "day", "time_window" => "7d", "aggregation" => "count" }
-      self.default_size   = { w: 6, h: 3 }
+      self.default_config = { "bucket" => "1d", "time_window" => "7d" }
+      self.default_size   = { w: 8, h: 3 }
 
       def empty?(data)
         return true if super
@@ -70,22 +95,33 @@ module Tiler
       end
 
       def self.example_config
-        { "value_column" => "duration", "aggregation" => "avg",
-          "bucket" => "day", "time_window" => "7d" }
+        {
+          "time_window" => "7d",
+          "bucket"      => "1d",
+          "series" => [
+            { "label" => "requests", "column" => "rpm",      "agg" => "sum" },
+            { "label" => "errors",   "column" => "errors",   "agg" => "sum" }
+          ]
+        }
       end
 
       def self.example_payload
-        { "status" => "ok", "duration" => 142.3 }
+        { "rpm" => 2_847, "errors" => 4 }
       end
 
       def self.example_preview
         {
           "labels" => %w[Mon Tue Wed Thu Fri Sat Sun],
           "datasets" => [
-            { "label" => "duration",
-              "data" => [ 142, 188, 167, 201, 175, 220, 199 ],
+            { "label" => "requests",
+              "data" => [ 1800, 2200, 2050, 2600, 2950, 2400, 2847 ],
               "borderColor" => "#3b82f6",
               "backgroundColor" => "#3b82f633",
+              "tension" => 0.3, "fill" => false },
+            { "label" => "errors×100",
+              "data" => [ 12, 8, 15, 10, 5, 7, 4 ],
+              "borderColor" => "#10b981",
+              "backgroundColor" => "#10b98133",
               "tension" => 0.3, "fill" => false }
           ],
           "options" => {}

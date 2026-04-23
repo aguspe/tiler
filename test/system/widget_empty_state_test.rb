@@ -27,7 +27,9 @@ module Tiler
       panel = create_panel(@dash, title: "Empty Line", widget_type: "line_chart",
                           data_source: @empty_source,
                           x: 0, y: 0, width: 6, height: 3,
-                          config: { aggregation: "count", bucket: "day", time_window: "7d" }.to_json)
+                          config: { bucket: "1d", time_window: "7d",
+                                    series: [ { label: "duration", column: "duration", agg: "avg" } ]
+                                  }.to_json)
       visit dashboard_path(@dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{panel.id}", wait: 5
       assert_selector ".tiler-panel-empty", wait: 5
@@ -38,7 +40,7 @@ module Tiler
       panel = create_panel(@dash, title: "Empty Pie", widget_type: "pie_chart",
                           data_source: @empty_source,
                           x: 0, y: 0, width: 6, height: 3,
-                          config: { aggregation: "count", group_by: "status" }.to_json)
+                          config: { aggregation: "count", group_column: "status" }.to_json)
       visit dashboard_path(@dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{panel.id}", wait: 5
       assert_selector ".tiler-panel-empty", wait: 5
@@ -75,7 +77,7 @@ module Tiler
       panel = create_panel(@dash, title: "Populated Bar", widget_type: "bar_chart",
                           data_source: source,
                           x: 0, y: 0, width: 6, height: 3,
-                          config: { aggregation: "count", group_by: "status",
+                          config: { aggregation: "count", group_column: "status",
                                     value_column: "duration" }.to_json)
       visit dashboard_path(@dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{panel.id}", wait: 5

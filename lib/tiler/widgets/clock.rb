@@ -11,7 +11,13 @@ module Tiler
       self.default_size   = { w: 3, h: 2 }
 
       def data
-        { timezone: config["timezone"], format: config["format"] || "24h" }
+        # show_date defaults true per catalog; only an explicit false hides it.
+        show_date = config.key?("show_date") ? !!config["show_date"] : true
+        {
+          timezone:  config["timezone"],
+          format:    config["format"] || "24h",
+          show_date: show_date
+        }
       end
     end
   end

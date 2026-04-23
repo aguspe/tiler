@@ -28,12 +28,22 @@ module Tiler
         h = (size[:h] || size["h"]).to_i
         config_default = klass.default_config.dup
         case type
-        when "line_chart", "bar_chart"
+        when "line_chart"
+          config_default["bucket"] ||= "1d"
+          config_default["series"] ||= [ { label: "duration", column: "duration", agg: "avg" } ]
+        when "bar_chart"
           config_default["aggregation"] ||= "count"
-          config_default["bucket"] ||= "day"
-        when "pie_chart", "list"
-          config_default["group_by"] ||= "status"
+          config_default["group_column"] ||= "status"
+          config_default["value_column"] ||= "duration"
+        when "pie_chart"
+          config_default["group_column"] ||= "status"
           config_default["aggregation"] ||= "count"
+        when "list"
+          config_default["label_column"] ||= "status"
+          config_default["aggregation"] ||= "count"
+        when "status_grid"
+          config_default["group_column"] ||= "status"
+          config_default["status_column"] ||= "status"
         when "table"
           config_default["limit"] ||= 5
         end

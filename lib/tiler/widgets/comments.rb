@@ -68,7 +68,7 @@ module Tiler
       self.label       = "Comments"
       self.query_class = CommentsQuery
       self.default_config = {}
-      self.default_size   = { w: 4, h: 3 }
+      self.default_size   = { w: 6, h: 2 }
 
       def self.example_config
         { "quote_column" => "quote", "name_column" => "name", "rotate_seconds" => 8, "limit" => 10 }

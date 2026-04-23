@@ -5,7 +5,7 @@ module Tiler
   module Widgets
     class PieChartQuery < Query::Base
       def call
-        group_col = config["group_by"]
+        group_col = config["group_column"]
         agg       = config["aggregation"] || "count"
         val_col   = config["value_column"]
 
@@ -39,7 +39,7 @@ module Tiler
       self.label       = "Pie Chart"
       self.query_class = PieChartQuery
       self.default_config = { "aggregation" => "count" }
-      self.default_size   = { w: 4, h: 3 }
+      self.default_size   = { w: 6, h: 3 }
 
       def empty?(data)
         return true if super
@@ -48,7 +48,7 @@ module Tiler
       end
 
       def self.example_config
-        { "group_by" => "status", "aggregation" => "count" }
+        { "group_column" => "status", "aggregation" => "count" }
       end
 
       def self.example_payload

@@ -19,11 +19,12 @@ module Tiler
         clamped = clamp(raw, min, max)
 
         {
-          value:  clamped,
-          min:    min,
-          max:    max,
-          prefix: prefix,
-          suffix: suffix
+          value:        clamped,
+          min:          min,
+          max:          max,
+          prefix:       prefix,
+          suffix:       suffix,
+          value_column: col
         }
       end
 

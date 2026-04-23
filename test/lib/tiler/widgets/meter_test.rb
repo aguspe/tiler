@@ -33,7 +33,7 @@ module Tiler
 
       test "query returns exactly five keys" do
         data = panel_with(value_column: "value", aggregation: "last", max: 1000).data
-        assert_equal %i[value min max prefix suffix].sort, data.keys.sort
+        assert_equal %i[value min max prefix suffix value_column].sort, data.keys.sort
       end
 
       test "min defaults to 0 and follows config when set" do
@@ -94,7 +94,7 @@ module Tiler
         panel = create_panel(empty_dash, widget_type: "meter", data_source: empty,
                              config: { value_column: "value", aggregation: "last", max: 100 }.to_json)
         data = panel.data
-        assert_equal %i[value min max prefix suffix].sort, data.keys.sort
+        assert_equal %i[value min max prefix suffix value_column].sort, data.keys.sort
         assert_nil data[:value]
       end
 
@@ -153,6 +153,23 @@ module Tiler
         html = render_partial(panel)
         assert_match(/Configure a numeric/i, html)
         assert_equal 0, html.scan(/<svg\b/).size
+      end
+
+      test "missing value_column renders configure placeholder, not gauge" do
+        panel = create_panel(@dash, widget_type: "meter", data_source: @source,
+                             config: { aggregation: "last", max: 100 }.to_json)
+        html = render_partial(panel)
+        assert_match(/Configure a.*value_column/i, html)
+        assert_equal 0, html.scan(/<svg\b/).size
+      end
+
+      test "meter SVG paths use token classes (no hard-coded hex)" do
+        panel = panel_with(value_column: "value", aggregation: "last", max: 1000)
+        html  = render_partial(panel)
+        assert_match(/class="tiler-meter-track"/, html)
+        assert_match(/class="tiler-meter-fill"/,  html)
+        refute_match(/stroke="#3b82f6"/, html, "primary stroke must use token class, not hex")
+        refute_match(/stroke="#e5e7eb"/, html, "track stroke must use token class, not hex")
       end
 
       test "value at min and value at max produce divergent SVG markup" do

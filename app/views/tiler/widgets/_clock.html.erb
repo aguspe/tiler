@@ -5,5 +5,7 @@
      data-tiler--clock-format-value="<%= data[:format] %>"
      <% if data[:timezone].present? %>data-tiler--clock-timezone-value="<%= data[:timezone] %>"<% end %>>
   <div class="tiler-clock-time" data-tiler--clock-target="time">--:--</div>
-  <div class="tiler-clock-date" data-tiler--clock-target="date">&nbsp;</div>
+  <% if data[:show_date] %>
+    <div class="tiler-clock-date" data-tiler--clock-target="date">&nbsp;</div>
+  <% end %>
 </div>

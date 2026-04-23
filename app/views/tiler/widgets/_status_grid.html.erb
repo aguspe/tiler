@@ -2,6 +2,9 @@
   <% data[:rows].each do |row| %>
     <div class="tiler-status-tile tiler-status-<%= row[:status] %>">
       <div class="tiler-status-name"><%= row[:name] %></div>
+      <% if row[:sub].present? %>
+        <div class="tiler-status-sub"><%= row[:sub] %></div>
+      <% end %>
       <div class="tiler-status-counts">
         <span class="tiler-pass"><%= row[:pass] %>✓</span>
         <span class="tiler-warn"><%= row[:warn] %>!</span>

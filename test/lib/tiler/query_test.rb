@@ -33,21 +33,28 @@ module Tiler
       assert_equal 500.0, panel_with("metric", { aggregation: "max", value_column: "duration" }).data[:value]
     end
 
-    test "table returns rows limited" do
-      data = panel_with("table", { limit: 3 }).data
-      assert_equal 3, data[:rows].size
-      assert_equal 5, data[:total]
+    test "table returns one row per group_by value, limited" do
+      # @source seed has 2 distinct statuses (ok, err) — limit fits both.
+      data = panel_with("table", {
+        group_by: "status",
+        limit: 5,
+        columns: [
+          { label: "Records", column: "duration", num: true, agg: "count" }
+        ]
+      }).data
+      assert_equal 2, data[:rows].size
+      assert_equal 2, data[:total]
     end
 
     test "pie groups by column" do
-      data = panel_with("pie_chart", { group_by: "status", aggregation: "count" }).data
+      data = panel_with("pie_chart", { group_column: "status", aggregation: "count" }).data
       labels = data[:labels]
       assert_includes labels, "ok"
       assert_includes labels, "err"
     end
 
     test "list ranks top items" do
-      data = panel_with("list", { group_by: "status", aggregation: "count", limit: 10 }).data
+      data = panel_with("list", { label_column: "status", aggregation: "count", limit: 10 }).data
       labels = data[:items].map { |i| i[:label] }
       values = data[:items].map { |i| i[:value] }
       assert_equal "ok", labels.first
@@ -77,14 +84,19 @@ module Tiler
       assert_equal "12h", panel.data[:format]
     end
 
-    test "text widget returns text from config" do
-      panel = create_panel(@dash, widget_type: "text", config: { text: "hello" }.to_json)
-      assert_equal "hello", panel.data[:text]
+    test "text widget returns body from config" do
+      panel = create_panel(@dash, widget_type: "text", config: { body: "hello" }.to_json)
+      assert_equal "hello", panel.data[:body]
     end
 
-    test "iframe widget returns url from config" do
-      panel = create_panel(@dash, widget_type: "iframe", config: { url: "https://example.com" }.to_json)
-      assert_equal "https://example.com", panel.data[:url]
+    test "iframe widget returns src from config" do
+      panel = create_panel(@dash, widget_type: "iframe", config: { src: "https://example.com" }.to_json)
+      assert_equal "https://example.com", panel.data[:src]
+    end
+
+    test "iframe widget rejects non-http(s) src" do
+      panel = create_panel(@dash, widget_type: "iframe", config: { src: "javascript:alert(1)" }.to_json)
+      assert_nil panel.data[:src]
     end
 
     test "number_with_delta computes delta" do
@@ -92,7 +104,7 @@ module Tiler
       panel = create_panel(@dash, widget_type: "number_with_delta", data_source: @source,
                            config: { aggregation: "count",
                                      time_window: "24h",
-                                     previous_window: "24h" }.to_json)
+                                     delta_window: "24h" }.to_json)
       @source.data_records.delete_all
       3.times { create_record(@source, { status: "ok" }, recorded_at: 2.hours.ago) }
       2.times { create_record(@source, { status: "ok" }, recorded_at: 30.hours.ago) }

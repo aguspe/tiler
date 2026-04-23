@@ -40,25 +40,27 @@ namespace :tiler do
       dash.panels.create!(title: "Status today", widget_type: "number_with_delta",
                           x: 6, y: 0, width: 3, height: 2, data_source: source,
                           config: { value_column: "duration", aggregation: "avg",
-                                    time_window: "24h", previous_window: "24h" }.to_json)
+                                    time_window: "24h", delta_window: "24h" }.to_json)
       dash.panels.create!(title: "About", widget_type: "text",
                           x: 9, y: 0, width: 3, height: 2,
-                          config: { text: "Tiler demo dashboard — drag panels to rearrange." }.to_json)
+                          config: { body: "Tiler demo dashboard — drag panels to rearrange." }.to_json)
       dash.panels.create!(title: "Avg duration (7d)", widget_type: "line_chart",
                           x: 0, y: 2, width: 8, height: 3, data_source: source,
-                          config: { value_column: "duration", aggregation: "avg",
-                                    bucket: "day", time_window: "7d" }.to_json)
+                          config: { time_window: "7d", bucket: "1d",
+                                    series: [
+                                      { label: "duration", column: "duration", agg: "avg" }
+                                    ] }.to_json)
       dash.panels.create!(title: "Breakdown by status", widget_type: "pie_chart",
                           x: 8, y: 2, width: 4, height: 3, data_source: source,
-                          config: { group_by: "status", aggregation: "count",
+                          config: { group_column: "status", aggregation: "count",
                                     time_window: "7d" }.to_json)
       dash.panels.create!(title: "Top statuses", widget_type: "list",
                           x: 0, y: 5, width: 4, height: 3, data_source: source,
-                          config: { group_by: "status", aggregation: "count",
-                                    time_window: "7d", limit: 10 }.to_json)
+                          config: { label_column: "status", aggregation: "count",
+                                    time_window: "7d", limit: 10, order: "desc" }.to_json)
       dash.panels.create!(title: "Docs", widget_type: "iframe",
                           x: 4, y: 5, width: 8, height: 3,
-                          config: { url: "https://smashing.github.io/" }.to_json)
+                          config: { src: "https://smashing.github.io/" }.to_json)
       dash.panels.create!(title: "Logo", widget_type: "image",
                           x: 0, y: 8, width: 4, height: 3,
                           config: { url: "https://picsum.photos/seed/tiler/400/300",

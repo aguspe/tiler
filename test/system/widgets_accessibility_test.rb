@@ -31,7 +31,7 @@ module Tiler
                    config: {}.to_json)
       create_panel(@dash, title: "About", widget_type: "text",
                    x: 4, y: 3, width: 8, height: 2,
-                   config: { text: "Accessibility sample dashboard." }.to_json)
+                   config: { body: "Accessibility sample dashboard." }.to_json)
     end
 
     test "dashboard with all widgets passes axe-core WCAG 2.1 AA checks" do

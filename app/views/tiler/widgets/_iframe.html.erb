@@ -1,9 +1,10 @@
-<% if data[:url].blank? %>
+<% if data[:src].blank? %>
   <p class="tiler-muted">No URL configured.</p>
 <% else %>
   <iframe class="tiler-iframe"
-          src="<%= data[:url] %>"
-          <%= "sandbox=\"#{data[:sandbox]}\"".html_safe if data[:sandbox].present? %>
+          src="<%= data[:src] %>"
+          title="<%= data[:title].presence || data[:src] %>"
+          sandbox="<%= data[:sandbox] %>"
           loading="lazy"
           referrerpolicy="no-referrer"></iframe>
 <% end %>

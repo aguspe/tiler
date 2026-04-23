@@ -76,9 +76,9 @@ module Tiler
                  "comments default should NOT include quote_column (forces explicit user config)"
     end
 
-    test "iframe default_config omits url so partial surfaces empty-state placeholder" do
-      assert_nil Tiler.widgets["iframe"].default_config["url"],
-                 "iframe default should NOT include url (forces explicit user config)"
+    test "iframe default_config omits src so partial surfaces empty-state placeholder" do
+      assert_nil Tiler.widgets["iframe"].default_config["src"],
+                 "iframe default should NOT include src (forces explicit user config)"
     end
 
     test "every widget default_config aggregation if present is in supported set" do

@@ -1,5 +1,7 @@
 <% if data[:max].nil? %>
   <p class="tiler-muted">Configure a numeric <code>max</code>.</p>
+<% elsif data[:value_column].blank? %>
+  <p class="tiler-muted">Configure a <code>value_column</code>.</p>
 <% else %>
   <%
     v = data[:value]
@@ -38,13 +40,15 @@
          aria-valuemin="<%= mn %>"
          aria-valuemax="<%= mx %>"
          aria-valuenow="<%= has_value ? v.to_f : mn %>">
-      <path d="M <%= bg_start_x.round(2) %> <%= bg_start_y.round(2) %> A <%= r %> <%= r %> 0 <%= large_bg %> 1 <%= bg_end_x.round(2) %> <%= bg_end_y.round(2) %>"
-            fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"></path>
+      <path class="tiler-meter-track"
+            d="M <%= bg_start_x.round(2) %> <%= bg_start_y.round(2) %> A <%= r %> <%= r %> 0 <%= large_bg %> 1 <%= bg_end_x.round(2) %> <%= bg_end_y.round(2) %>"
+            fill="none" stroke-width="14" stroke-linecap="round"></path>
       <% if pct > 0 %>
-        <path d="M <%= bg_start_x.round(2) %> <%= bg_start_y.round(2) %> A <%= r %> <%= r %> 0 <%= large_fg %> 1 <%= fg_end_x.round(2) %> <%= fg_end_y.round(2) %>"
-              fill="none" stroke="#3b82f6" stroke-width="14" stroke-linecap="round"></path>
+        <path class="tiler-meter-fill"
+              d="M <%= bg_start_x.round(2) %> <%= bg_start_y.round(2) %> A <%= r %> <%= r %> 0 <%= large_fg %> 1 <%= fg_end_x.round(2) %> <%= fg_end_y.round(2) %>"
+              fill="none" stroke-width="14" stroke-linecap="round"></path>
       <% end %>
-      <text x="100" y="115" text-anchor="middle" class="tiler-meter-value" font-size="28" font-weight="600" fill="#111827"><%= data[:prefix] %><%= display_value %><%= data[:suffix] %></text>
+      <text x="100" y="115" text-anchor="middle" class="tiler-meter-value" font-size="28" font-weight="600"><%= data[:prefix] %><%= display_value %><%= data[:suffix] %></text>
     </svg>
   </div>
 <% end %>

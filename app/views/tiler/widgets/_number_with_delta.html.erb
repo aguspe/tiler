@@ -1,6 +1,27 @@
-<div class="tiler-metric">
-  <div class="tiler-metric-value">
-    <%= data[:value].is_a?(Numeric) ? number_with_delimiter(data[:value]) : (data[:value] || "—") %>
+<div class="tiler-metric tiler-number-with-delta">
+  <div class="tiler-number-with-delta-row">
+    <div class="tiler-metric-value">
+      <%= data[:value].is_a?(Numeric) ? number_with_delimiter(data[:value]) : (data[:value] || "—") %>
+    </div>
+    <% spark = Array(data[:spark]).map(&:to_f) %>
+    <% if spark.any? %>
+      <% min, max = spark.min, spark.max %>
+      <% range = (max - min).nonzero? || 1 %>
+      <% w, h, pad = 80, 24, 2 %>
+      <% step = (w - pad * 2).to_f / [ spark.size - 1, 1 ].max %>
+      <% points = spark.each_with_index.map { |v, i|
+           x = pad + step * i
+           y = h - pad - (((v - min) / range) * (h - pad * 2))
+           "#{x.round(2)},#{y.round(2)}"
+         }.join(" ") %>
+      <svg class="tiler-sparkline"
+           viewBox="0 0 <%= w %> <%= h %>"
+           preserveAspectRatio="none"
+           role="img"
+           aria-label="trend">
+        <polyline points="<%= points %>" fill="none" />
+      </svg>
+    <% end %>
   </div>
   <div class="tiler-metric-label"><%= data[:label] %></div>
   <% if data[:pct] %>

@@ -4,33 +4,35 @@ require "tiler/query/base"
 module Tiler
   module Widgets
     class StatusGridQuery < Query::Base
+      # Catalog states map to four tokens. Built-in vocabulary covers most
+      # health-check payloads; custom value lists are out of scope per spec.
       PASS = %w[pass passed ok success true].freeze
       FAIL = %w[fail failed error false].freeze
       WARN = %w[flaky warn warning skip skipped].freeze
+      DEFAULT_LIMIT = 50
 
       def call
-        row_col    = config["row_column"]
+        group_col  = config["group_column"]
         status_col = config["status_column"]
-        limit      = (config["limit_rows"] || 50).to_i
-        return { rows: [] } if row_col.blank? || status_col.blank?
+        sub_col    = config["sub_column"]
+        limit      = DEFAULT_LIMIT
+        return { rows: [] } if group_col.blank? || status_col.blank?
 
-        pass_vals = Array(config["pass_values"].presence || PASS)
-        fail_vals = Array(config["fail_values"].presence || FAIL)
-        warn_vals = Array(config["warn_values"].presence || WARN)
-
-        groups = distinct_values(row_col).first(limit)
+        groups = distinct_values(group_col).first(limit)
         rows = groups.map do |group_val|
-          scope = base_scope.where("json_extract(payload, ?) = ?", "$.#{row_col}", group_val)
+          scope = base_scope.where("json_extract(payload, ?) = ?", "$.#{group_col}", group_val)
           statuses = scope.pluck(Arel.sql(json_extract(status_col)))
           last     = scope.order(recorded_at: :desc).first
+          payload  = last&.parsed_payload.to_h
 
           {
             name:        group_val,
-            status:      classify(last&.parsed_payload.to_h[status_col], pass_vals, fail_vals, warn_vals),
-            last_status: last&.parsed_payload.to_h[status_col],
-            pass:        statuses.count { |s| pass_vals.include?(s.to_s.downcase) },
-            fail:        statuses.count { |s| fail_vals.include?(s.to_s.downcase) },
-            warn:        statuses.count { |s| warn_vals.include?(s.to_s.downcase) },
+            status:      classify(payload[status_col]),
+            last_status: payload[status_col],
+            sub:         (sub_col.present? ? payload[sub_col] : nil),
+            pass:        statuses.count { |s| PASS.include?(s.to_s.downcase) },
+            fail:        statuses.count { |s| FAIL.include?(s.to_s.downcase) },
+            warn:        statuses.count { |s| WARN.include?(s.to_s.downcase) },
             total:       statuses.size,
             last_run:    last&.recorded_at&.strftime("%Y-%m-%d %H:%M")
           }
@@ -40,11 +42,11 @@ module Tiler
 
       private
 
-      def classify(status, pass_vals, fail_vals, warn_vals)
+      def classify(status)
         s = status.to_s.downcase
-        return "fail" if fail_vals.include?(s)
-        return "warn" if warn_vals.include?(s)
-        return "pass" if pass_vals.include?(s)
+        return "fail" if FAIL.include?(s)
+        return "warn" if WARN.include?(s)
+        return "pass" if PASS.include?(s)
         "unknown"
       end
     end
@@ -58,7 +60,8 @@ module Tiler
       self.default_size   = { w: 6, h: 3 }
 
       def self.example_config
-        { "row_column" => "suite", "status_column" => "status", "limit_rows" => 20 }
+        { "group_column" => "suite", "status_column" => "status",
+          "sub_column" => "duration", "time_window" => "24h" }
       end
 
       def self.example_payload

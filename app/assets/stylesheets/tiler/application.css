@@ -207,8 +207,12 @@ body.tiler-tv .tiler-grid-stack { border: none; }
 .tiler-table-scroll { width: 100%; }
 .tiler-table { width: 100%; border-collapse: collapse; font-family: var(--font-body); font-size: var(--fs-body-sm); table-layout: auto; }
 .tiler-table th, .tiler-table td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); }
-.tiler-table th { background: var(--paper-3); font-weight: var(--fw-semi); color: var(--ink-2); font-size: 11px; letter-spacing: 0.02em; text-transform: uppercase; }
+/* Sticky header inside the .tiler-table-scroll viewport — keeps column labels
+   visible while the user scrolls a tall table within its tile. */
+.tiler-table thead th { position: sticky; top: 0; z-index: 2; background: var(--paper-3); font-weight: var(--fw-semi); color: var(--ink-2); font-size: 11px; letter-spacing: 0.02em; text-transform: uppercase; }
 .tiler-table td { color: var(--ink-2); }
+/* Numeric columns: right-aligned, monospace, tabular-numeric. */
+.tiler-table .tiler-table-num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); }
 .tiler-table-footer { margin-top: 0.5rem; color: var(--ink-3); font-size: var(--fs-caption); }
 
 .tiler-status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; }
@@ -244,7 +248,9 @@ code { font-family: var(--font-mono); background: var(--paper-3); padding: 0.125
 /* Meter widget */
 .tiler-meter { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
 .tiler-meter-svg { width: 100%; max-width: 240px; height: auto; max-height: 100%; }
-.tiler-meter-value { font-family: var(--font-display); font-weight: var(--fw-bold); color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: var(--tr-heading); }
+.tiler-meter-value { font-family: var(--font-display); font-weight: var(--fw-bold); fill: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: var(--tr-heading); }
+.tiler-meter-track { stroke: var(--border); }
+.tiler-meter-fill  { stroke: var(--primary); }
 
 /* Comments widget */
 .tiler-comments { display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; }
@@ -254,7 +260,12 @@ code { font-family: var(--font-mono); background: var(--paper-3); padding: 0.125
 .tiler-comment-quote { margin: 0; font-family: var(--font-display); font-style: italic; font-size: var(--fs-body); color: var(--ink-2); line-height: 1.4; }
 .tiler-comment-name { margin: 0; font-family: var(--font-body); font-size: 11px; color: var(--ink-3); font-weight: var(--fw-semi); }
 
-/* Number-with-delta widget tweaks (uses .tiler-metric* + .tiler-delta* hooks) */
+/* Number-with-delta widget — value + inline sparkline + delta. Per catalog:
+   sparkline uses --primary stroke, no fill. */
+.tiler-number-with-delta-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.tiler-number-with-delta-row .tiler-metric-value { flex: 0 0 auto; }
+.tiler-sparkline { flex: 1 1 auto; max-width: 100px; height: 24px; min-width: 40px; stroke: var(--primary); fill: none; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.tiler-sparkline polyline { fill: none; stroke: var(--primary); stroke-width: 1.5; }
 
 /* Widget palette (drag-drop new panels) */
 .tiler-dashboard-shell { display: flex; align-items: stretch; gap: 12px; }
