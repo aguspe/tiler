@@ -3,6 +3,15 @@ ENV["RAILS_ENV"] = "test"
 require_relative "dummy/config/environment"
 require "rails/test_help"
 
+# Engine bin/rails fires the engine railtie which auto-appends the engine's
+# db/migrate path. The dummy app's zz_dedupe_engine_migrations initializer
+# also adds it (covering the bundle-exec-from-dummy case). Without an explicit
+# dedupe before maintain_test_schema! runs, the duplicate path makes
+# `assume_migrated_upto_version` see each migration twice and abort.
+paths = Rails.application.config.paths["db/migrate"]
+list  = paths.to_a.uniq
+paths.instance_variable_set(:@paths, list)
+
 ActiveRecord::Migration.maintain_test_schema!
 
 if ActiveSupport::TestCase.respond_to?(:fixture_paths=)
