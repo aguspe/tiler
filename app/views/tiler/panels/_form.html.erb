@@ -40,20 +40,27 @@
   </div>
   <p class="tiler-hint">You can also drag &amp; resize panels directly on the dashboard.</p>
 
+  <% has_example = widget_klass.example_config.is_a?(Hash) && widget_klass.example_config.any? %>
+  <% data_backed = !widget_klass.query_class.nil? %>
+
   <div class="tiler-field">
     <%= f.label :config, "Config (JSON)" %>
-    <%= f.text_area :config, rows: 8, placeholder: example_config %>
-    <div class="tiler-example-config-row"
-         data-controller="tiler--clipboard"
-         data-tiler--clipboard-text-value="<%= example_config %>">
-      <span class="tiler-hint">Example for <%= widget_klass.label %>:</span>
-      <code data-tiler-example-config><%= example_config %></code>
-      <button type="button" class="tiler-btn tiler-btn-sm" data-tiler-copy
-              data-action="click->tiler--clipboard#copy">Copy</button>
-    </div>
-    <p class="tiler-hint">
-      Tip: paste any static JSON here to <strong>preview</strong> the widget without a data source — useful for quickly trying different shapes.
-    </p>
+    <%= f.text_area :config, rows: 8, placeholder: (has_example ? example_config : "{}") %>
+    <% if has_example %>
+      <div class="tiler-example-config-row"
+           data-controller="tiler--clipboard"
+           data-tiler--clipboard-text-value="<%= example_config %>">
+        <span class="tiler-hint">Example for <%= widget_klass.label %>:</span>
+        <code data-tiler-example-config><%= example_config %></code>
+        <button type="button" class="tiler-btn tiler-btn-sm" data-tiler-copy
+                data-action="click->tiler--clipboard#copy">Copy</button>
+      </div>
+    <% end %>
+    <% if data_backed %>
+      <p class="tiler-hint">
+        Tip: paste any static JSON here to <strong>preview</strong> the widget without a data source — useful for quickly trying different shapes.
+      </p>
+    <% end %>
   </div>
 
   <details class="tiler-info" data-tiler-info open>

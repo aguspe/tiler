@@ -22,12 +22,30 @@
                 data-action="click->tiler--dashboard-grid#togglePalette">Add Panel</button>
       </div>
     </div>
+    <details class="tiler-settings" data-tiler-settings
+             data-controller="tiler--settings"
+             data-tiler--settings-storage-key-value="tiler.dashboard.<%= @dashboard.id %>.settings">
+      <summary class="tiler-btn tiler-btn-sm">Settings</summary>
+      <div class="tiler-settings-menu">
+        <button type="button"
+                class="tiler-settings-item"
+                data-tiler-about-toggle
+                data-action="click->tiler--settings#toggleAbout">Hide About</button>
+      </div>
+    </details>
   </div>
 
   <details class="tiler-about" data-tiler-about open>
     <summary>About this dashboard</summary>
-    <p>Tiler is a plug-and-play dashboards engine for Rails. Each tile is a <strong>widget</strong> that pulls from a <strong>data source</strong>. Push records via the data source's webhook (one-line curl, see any panel's Edit page → "How do I push data"), or paste a static JSON config to preview a widget.</p>
-    <p class="tiler-muted">Drag a tile to move it. Resize from the bottom-right corner. Click <strong>Add Panel</strong> to drop in new widgets from the palette. Edit each tile from its <em>Edit</em> link.</p>
+    <p><strong>Tiler</strong> is a plug-and-play dashboards engine for Rails. Each tile is a <strong>widget</strong> that pulls from a <strong>data source</strong>.</p>
+    <p>To populate a widget you can either:</p>
+    <ul class="tiler-about-list">
+      <li>Push records via the data source's webhook — open any panel's Edit page → <em>How do I push data</em> for a one-line curl.</li>
+      <li>Paste a static JSON config to preview a widget instantly without a data source.</li>
+    </ul>
+    <p class="tiler-muted">
+      <strong>Drag</strong> a tile to move it. <strong>Resize</strong> from the bottom-right corner. Click <strong>Add Panel</strong> to drop in new widgets from the palette. <strong>Edit</strong> each tile from its <em>Edit</em> link.
+    </p>
   </details>
 
   <% panels = @dashboard.panels %>
