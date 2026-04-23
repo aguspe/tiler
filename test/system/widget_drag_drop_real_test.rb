@@ -23,7 +23,6 @@ module Tiler
       assert_selector ".grid-stack", wait: 5
       static = page.evaluate_script("document.querySelector('.grid-stack').gridstack.opts.staticGrid")
       assert_equal false, static, "gridstack should NOT be static — drag should work without any prior click"
-      assert_selector ".grid-stack.tiler-editing", wait: 5
     end
 
     test "panel header is rendered and panel surface is the drag handle" do

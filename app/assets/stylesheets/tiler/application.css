@@ -70,10 +70,12 @@ turbo-cable-stream-source { display: none !important; }
   opacity: 0.8;
   z-index: 100;
 }
+/* Drag affordance: subtle, hover-scoped — not an always-on "selected" tint.
+   Drag is live globally; the cursor change inside grid tiles tells users it. */
+.tiler-grid-stack .grid-stack-item-content { cursor: move; }
+.tiler-grid-stack .tiler-panel:hover { outline: 1px dashed var(--primary-tint); }
+/* Edit-mode (palette open) — only the panel beneath a hovered drop tightens. */
 .tiler-editing .tiler-panel-header { cursor: move; background: var(--primary-tint); }
-.tiler-editing .grid-stack-item-content { cursor: move; }
-.tiler-editing .tiler-panel { outline: 1px dashed var(--border-2); }
-.tiler-editing .tiler-panel:hover { outline-color: var(--primary); }
 .tiler-editing .tiler-panel { outline: 2px solid var(--primary); outline-offset: -2px; }
 .tiler-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 

@@ -36,6 +36,9 @@ export default class extends Controller {
       cellHeight: 90,
       margin: 0,
       staticGrid: false,
+      // float: true keeps the seeded layout intact on page load. Compact runs
+      // after each user-initiated change instead — no permanent gaps when
+      // panels are rearranged, but the initial layout you authored stays put.
       float: true,
       // Whole tile is the drag handle — drag works always (no edit mode toggle).
       handle: ".grid-stack-item-content",
@@ -49,10 +52,18 @@ export default class extends Controller {
       })
     }
 
-    // Always-editable: panels carry the editing visual cue from the start.
-    this.gridTarget.classList.add("tiler-editing")
+    // Drag is always live. We do NOT add the .tiler-editing class globally —
+    // that produced a 'whole dashboard is selected' visual. Drag affordance
+    // lives in cursor + subtle outline-on-hover (CSS).
     this.paletteOpen = false
-    this._onChange = (_event, items) => this.persistLayout(items)
+    this._onChange = (event, items) => {
+      this.persistLayout(items)
+      // Compact AFTER user moves so freed slots get filled. Skip the very
+      // first synthetic 'change' that gridstack fires during init (items === undefined).
+      if (items && items.length && typeof this.grid.compact === "function") {
+        this.grid.compact()
+      }
+    }
     this._onDropped = (_event, _previousNode, newNode) => this.handleDrop(newNode)
     this.grid.on("change", this._onChange)
     this.grid.on("dropped", this._onDropped)

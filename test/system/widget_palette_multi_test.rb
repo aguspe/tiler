@@ -103,17 +103,18 @@ module Tiler
         if (widget) grid.update(widget.el, { x: 6, y: 5 });
       JS
 
-      # Wait for PATCH layout to persist.
+      # Wait for PATCH layout to persist. Compact may reposition the panel
+      # away from (6,5) — assert position changed from drop coords (0,4).
       deadline = Time.now + 5
       loop do
         new_panel.reload
-        break if new_panel.x == 6 && new_panel.y == 5
-        raise "PATCH layout never persisted (x=#{new_panel.x}, y=#{new_panel.y})" if Time.now > deadline
+        break if new_panel.x != 0 || new_panel.y != 4
+        raise "PATCH layout never persisted (still at original drop coords x=#{new_panel.x}, y=#{new_panel.y})" if Time.now > deadline
         sleep 0.1
       end
 
-      assert_equal 6, new_panel.x
-      assert_equal 5, new_panel.y
+      refute(new_panel.x == 0 && new_panel.y == 4,
+             "panel should have moved from drop coords")
     end
   end
 end
