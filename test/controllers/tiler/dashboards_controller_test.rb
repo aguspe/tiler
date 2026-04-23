@@ -4,6 +4,10 @@ module Tiler
   class DashboardsControllerTest < ActionDispatch::IntegrationTest
     include Engine.routes.url_helpers
 
+    setup do
+      @dash = create_dashboard
+    end
+
     test "GET index renders" do
       get dashboards_path
       assert_response :success
@@ -59,6 +63,70 @@ module Tiler
       assert_difference "Tiler::Dashboard.count", -1 do
         delete dashboard_path(d.slug)
       end
+    end
+
+    test "PATCH layout clamps negative x to 0" do
+      panel = create_panel(@dash, x: 5, y: 0)
+      patch layout_dashboard_path(@dash),
+            params: { items: [ { id: panel.id, x: -100, y: 2, w: 4, h: 2 } ] },
+            as: :json
+      assert_response :ok
+      panel.reload
+      assert_equal 0, panel.x
+    end
+
+    test "PATCH layout clamps x above 11 to 11" do
+      panel = create_panel(@dash, x: 0, y: 0)
+      patch layout_dashboard_path(@dash),
+            params: { items: [ { id: panel.id, x: 99, y: 2, w: 4, h: 2 } ] },
+            as: :json
+      assert_response :ok
+      panel.reload
+      assert_equal 11, panel.x
+    end
+
+    test "PATCH layout clamps negative y to 0" do
+      panel = create_panel(@dash, x: 0, y: 5)
+      patch layout_dashboard_path(@dash),
+            params: { items: [ { id: panel.id, x: 0, y: -5, w: 4, h: 2 } ] },
+            as: :json
+      assert_response :ok
+      panel.reload
+      assert_equal 0, panel.y
+    end
+
+    test "PATCH layout returns 400 with JSON error for non-array items" do
+      patch layout_dashboard_path(@dash),
+            params: { items: "not-an-array" },
+            as: :json
+      assert_response :bad_request
+      body = JSON.parse(response.body)
+      assert body["error"].present?
+    end
+
+    test "PATCH layout skips items with missing id and counts skipped" do
+      panel = create_panel(@dash, x: 0, y: 0)
+      patch layout_dashboard_path(@dash),
+            params: { items: [
+              { id: panel.id, x: 1, y: 1, w: 4, h: 2 },
+              { x: 2, y: 2, w: 4, h: 2 } # no id
+            ] },
+            as: :json
+      assert_response :ok
+      body = JSON.parse(response.body)
+      assert_equal 1, body["applied"]
+      assert_equal 1, body["skipped"]
+    end
+
+    test "PATCH layout response shape is {applied, skipped}" do
+      panel = create_panel(@dash, x: 0, y: 0)
+      patch layout_dashboard_path(@dash),
+            params: { items: [ { id: panel.id, x: 0, y: 0, w: 4, h: 2 } ] },
+            as: :json
+      assert_response :ok
+      body = JSON.parse(response.body)
+      assert_kind_of Integer, body["applied"]
+      assert_kind_of Integer, body["skipped"]
     end
   end
 end

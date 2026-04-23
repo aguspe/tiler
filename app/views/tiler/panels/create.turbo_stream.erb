@@ -1,0 +1,21 @@
+<%# Appends the new panel to the dashboard grid. %>
+<%# Targets DOM id `tiler-grid-stack-<dashboard.id>` — added by T-110 to .grid-stack. %>
+<%= turbo_stream.append "tiler-grid-stack-#{@dashboard.id}" do %>
+  <div class="grid-stack-item"
+       gs-id="<%= @panel.id %>"
+       gs-x="<%= @panel.x %>"
+       gs-y="<%= @panel.y %>"
+       gs-w="<%= @panel.width %>"
+       gs-h="<%= @panel.height %>">
+    <div class="grid-stack-item-content">
+      <%= turbo_frame_tag "tiler_panel_#{@panel.id}",
+            src: preview_dashboard_panel_path(@dashboard, @panel),
+            loading: (Tiler.configuration.eager_panel_load ? :eager : :lazy) do %>
+        <div class="tiler-skeleton">
+          <div class="tiler-skeleton-title"></div>
+          <div class="tiler-skeleton-body"></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

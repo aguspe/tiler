@@ -16,10 +16,20 @@ module Tiler
     def create
       @panel = @dashboard.panels.build(panel_params)
       if @panel.save
-        redirect_to dashboard_path(@dashboard), notice: "Panel added."
+        respond_to do |format|
+          format.html         { redirect_to dashboard_path(@dashboard), notice: "Panel added." }
+          format.json         { render json: panel_json(@panel), status: :created }
+          format.turbo_stream # renders create.turbo_stream.erb (appends to grid)
+        end
       else
-        @data_sources = DataSource.active.by_name
-        render :new, status: :unprocessable_entity
+        respond_to do |format|
+          format.html do
+            @data_sources = DataSource.active.by_name
+            render :new, status: :unprocessable_entity
+          end
+          format.json { render json: { errors: @panel.errors.full_messages }, status: :unprocessable_entity }
+          format.turbo_stream { render json: { errors: @panel.errors.full_messages }, status: :unprocessable_entity }
+        end
       end
     end
 
@@ -59,6 +69,20 @@ module Tiler
     def panel_params
       params.require(:panel).permit(:tiler_data_source_id, :title, :widget_type,
                                     :width, :height, :x, :y, :config)
+    end
+
+    def panel_json(panel)
+      {
+        id:            panel.id,
+        widget_type:   panel.widget_type,
+        title:         panel.title,
+        x:             panel.x,
+        y:             panel.y,
+        width:         panel.width,
+        height:        panel.height,
+        config:        panel.config,
+        preview_url:   preview_dashboard_panel_path(@dashboard, panel)
+      }
     end
   end
 end

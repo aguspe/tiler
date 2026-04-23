@@ -10,6 +10,10 @@ module Dummy
   class Application < Rails::Application
     config.load_defaults Rails::VERSION::STRING.to_f
 
+    # Make engine migrations discoverable to the dummy app so `bin/rails db:migrate`
+    # picks up `db/migrate/*` from the engine root without manual stamping or mirroring.
+    config.paths["db/migrate"] << File.expand_path("../../../db/migrate", __dir__)
+
     # For compatibility with applications that use this config
     config.action_controller.include_all_helpers = false
 

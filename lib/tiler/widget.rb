@@ -1,10 +1,12 @@
 module Tiler
   class Widget
     class << self
-      attr_accessor :type, :partial, :label, :query_class, :col_spans
+      attr_accessor :type, :partial, :label, :query_class, :col_spans, :default_config, :default_size
     end
 
-    self.col_spans = [ 1, 2 ]
+    self.col_spans      = [ 1, 2 ]
+    self.default_config = {}
+    self.default_size   = { w: 6, h: 2 }
 
     attr_reader :panel, :config
 

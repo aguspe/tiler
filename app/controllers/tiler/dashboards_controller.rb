@@ -40,20 +40,40 @@ module Tiler
     end
 
     def layout
-      items = Array(params[:items])
+      items = params[:items]
+      unless items.is_a?(Array)
+        return render json: { error: "items must be an array" }, status: :bad_request
+      end
+
+      applied = 0
+      skipped = 0
+
       ActiveRecord::Base.transaction do
         items.each do |item|
+          unless item.respond_to?(:[]) &&
+                 item[:id].present? &&
+                 !item[:x].nil? && !item[:y].nil? &&
+                 !item[:w].nil? && !item[:h].nil?
+            skipped += 1
+            next
+          end
+
           panel = @dashboard.panels.find_by(id: item[:id])
-          next unless panel
-          panel.update_columns(
-            x:      item[:x].to_i,
-            y:      item[:y].to_i,
-            width:  item[:w].to_i.clamp(1, 12),
-            height: item[:h].to_i.clamp(1, 12)
-          )
+          unless panel
+            skipped += 1
+            next
+          end
+
+          x = item[:x].to_i.clamp(0, 11)
+          y = [ item[:y].to_i, 0 ].max
+          w = item[:w].to_i.clamp(1, 12)
+          h = item[:h].to_i.clamp(1, 12)
+          panel.update_columns(x: x, y: y, width: w, height: h)
+          applied += 1
         end
       end
-      head :ok
+
+      render json: { applied: applied, skipped: skipped }, status: :ok
     end
 
     private

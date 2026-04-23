@@ -49,6 +49,8 @@ module Tiler
       self.partial     = "tiler/widgets/meter"
       self.label       = "Meter"
       self.query_class = MeterQuery
+      self.default_config = {}
+      self.default_size   = { w: 4, h: 3 }
     end
   end
 end

@@ -67,6 +67,8 @@ module Tiler
       self.partial     = "tiler/widgets/comments"
       self.label       = "Comments"
       self.query_class = CommentsQuery
+      self.default_config = {}
+      self.default_size   = { w: 4, h: 3 }
     end
   end
 end

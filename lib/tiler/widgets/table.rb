@@ -26,6 +26,8 @@ module Tiler
       self.partial     = "tiler/widgets/table"
       self.label       = "Table"
       self.query_class = TableQuery
+      self.default_config = { "limit" => 10 }
+      self.default_size   = { w: 6, h: 4 }
     end
   end
 end

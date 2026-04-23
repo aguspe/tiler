@@ -38,6 +38,8 @@ module Tiler
       self.partial     = "tiler/widgets/bar_chart"
       self.label       = "Bar Chart"
       self.query_class = BarChartQuery
+      self.default_config = { "aggregation" => "count" }
+      self.default_size   = { w: 4, h: 3 }
     end
   end
 end

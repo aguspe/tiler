@@ -7,7 +7,8 @@ module Tiler
                   :authorize_ingest,
                   :current_user_method,
                   :webhook_token_header,
-                  :default_refresh_seconds
+                  :default_refresh_seconds,
+                  :eager_panel_load
 
     def initialize
       @parent_controller       = "::ApplicationController"
@@ -18,6 +19,7 @@ module Tiler
       @current_user_method     = :current_user
       @webhook_token_header    = "X-Tiler-Token"
       @default_refresh_seconds = 0
+      @eager_panel_load        = false
     end
   end
 end

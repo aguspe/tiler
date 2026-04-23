@@ -49,6 +49,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .tiler-grid-stack .tiler-list,
 .tiler-grid-stack .tiler-status-grid { max-height: 100%; overflow: auto; margin: 0; }
 .tiler-grid-stack .tiler-table { max-height: 100%; overflow: auto; display: block; }
+.tiler-grid-stack .tiler-text { max-height: 100%; overflow: auto; }
 .tiler-grid-stack .tiler-metric { padding: 0.25rem 0; }
 .tiler-grid-stack .tiler-metric-value { font-size: 2rem; line-height: 1.1; }
 .tiler-grid-stack .tiler-metric-label { margin-top: 0.125rem; }
@@ -74,7 +75,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .tiler-text-lg { font-size: 1.25rem; }
 .tiler-text-xl { font-size: 1.5rem; font-weight: 600; }
 
-.tiler-iframe { width: 100%; height: 100%; border: 0; min-height: 200px; }
+.tiler-iframe { width: 100%; height: 100%; border: 0; display: block; }
 
 .tiler-list { list-style: none; padding: 0; margin: 0; }
 .tiler-list-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #f3f4f6; font-size: 0.875rem; }
@@ -91,7 +92,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .tiler-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; }
 .tiler-panel-header h3 { margin: 0; font-size: 0.875rem; font-weight: 600; color: #374151; }
 .tiler-panel-actions { display: flex; gap: 0.5rem; align-items: center; }
-.tiler-panel-body { padding: 1rem; min-height: 180px; position: relative; }
+.tiler-panel-body { padding: 1rem; position: relative; }
 
 .tiler-tag { background: #f3f4f6; color: #6b7280; font-size: 0.7rem; padding: 0.125rem 0.5rem; border-radius: 4px; }
 
@@ -151,3 +152,16 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: 
 .tiler-comment-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex: none; }
 .tiler-comment-quote { margin: 0; font-size: 0.95rem; color: #374151; font-style: italic; line-height: 1.4; }
 .tiler-comment-name { margin: 0; font-size: 0.75rem; color: #6b7280; font-weight: 600; }
+
+/* Widget palette (drag-drop new panels) */
+.tiler-dashboard-shell { display: flex; align-items: stretch; gap: 1rem; }
+.tiler-dashboard-shell .tiler-grid-stack { flex: 1 1 auto; min-width: 0; }
+.tiler-widget-palette { display: none; flex: 0 0 200px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.75rem; max-height: 80vh; overflow: auto; align-self: flex-start; }
+.tiler-dashboard-shell.tiler-editing-mode .tiler-widget-palette { display: block; }
+.tiler-widget-palette-title { margin: 0 0 0.5rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; font-weight: 600; }
+.tiler-widget-palette-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.tiler-widget-palette-item { padding: 0.5rem 0.75rem; border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; font-size: 0.875rem; color: #374151; cursor: grab; user-select: none; }
+.tiler-widget-palette-item:hover { background: #f3f4f6; border-color: #d1d5db; }
+.tiler-widget-palette-item:active { cursor: grabbing; }
+.tiler-widget-palette-item:focus { outline: 2px solid #3b82f6; outline-offset: 2px; }
+.tiler-widget-palette-label { display: block; }

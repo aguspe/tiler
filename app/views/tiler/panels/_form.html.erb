@@ -1,6 +1,6 @@
 <%= form_with(model: panel,
               url: panel.persisted? ? dashboard_panel_path(@dashboard, panel) : dashboard_panels_path(@dashboard),
-              local: true, class: "tiler-form") do |f| %>
+              local: true, data: { turbo: false }, class: "tiler-form") do |f| %>
   <% if panel.errors.any? %>
     <div class="tiler-form-errors">
       <ul><% panel.errors.full_messages.each do |m| %><li><%= m %></li><% end %></ul>

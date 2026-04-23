@@ -60,6 +60,8 @@ module Tiler
       self.partial     = "tiler/widgets/line_chart"
       self.label       = "Line Chart"
       self.query_class = LineChartQuery
+      self.default_config = { "bucket" => "day", "time_window" => "7d", "aggregation" => "count" }
+      self.default_size   = { w: 6, h: 3 }
     end
   end
 end

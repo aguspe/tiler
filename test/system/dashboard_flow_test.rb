@@ -19,8 +19,7 @@ module Tiler
       visit dashboard_path(@dash.slug)
       assert_text "Sys Demo"
       assert_selector "turbo-frame#tiler_panel_#{@metric.id}", wait: 10
-      # Force-reload the turbo frame in case viewport lazy-load didn't trigger.
-      page.execute_script(%{document.querySelectorAll('turbo-frame').forEach(f => f.reload && f.reload())})
+      # Eager panel load (cavekit dashboard-layout R6) replaces the prior force-reload workaround.
       assert_text "Count", wait: 10
       assert_text "5",     wait: 10
       assert_selector ".tiler-clock", wait: 10
@@ -142,8 +141,7 @@ module Tiler
       fill_in "Config (JSON)", with: { aggregation: "count" }.to_json
       click_button "Create Panel"
       assert_text "Panel added", wait: 5
-      # Panel is rendered inside a lazy Turbo frame — trigger reload.
-      page.execute_script(%{document.querySelectorAll('turbo-frame').forEach(f => f.reload && f.reload())})
+      # Eager panel load (cavekit dashboard-layout R6) replaces the prior force-reload workaround.
       assert_selector "turbo-frame", text: "New Metric", wait: 10
     end
   end

@@ -10,7 +10,7 @@ module Tiler
         prev  = previous_window_seconds
 
         current  = aggregate(base_scope, col, agg)
-        previous = if prev && time_window_start
+        previous = if prev && time_window_start && source
           scope = apply_filters(
             source.data_records.where(recorded_at: (time_window_start - prev)...time_window_start)
           )
@@ -51,6 +51,8 @@ module Tiler
       self.partial     = "tiler/widgets/number_with_delta"
       self.label       = "Number (with delta)"
       self.query_class = NumberWithDeltaQuery
+      self.default_config = { "aggregation" => "count", "time_window" => "24h", "previous_window" => "24h" }
+      self.default_size   = { w: 3, h: 2 }
     end
   end
 end

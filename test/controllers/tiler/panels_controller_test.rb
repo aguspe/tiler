@@ -56,5 +56,38 @@ module Tiler
         delete dashboard_panel_path(@dash.slug, p)
       end
     end
+
+    test "POST create rejects forged widget_type with 422" do
+      dash = create_dashboard
+      assert_no_difference -> { dash.panels.count } do
+        post dashboard_panels_path(dash.slug),
+             params: { panel: { widget_type: "../etc/passwd", title: "X",
+                                x: 0, y: 0, width: 3, height: 2, config: "{}" } },
+             as: :json
+      end
+      assert_response :unprocessable_entity
+    end
+
+    test "POST create rejects blank widget_type with 422" do
+      dash = create_dashboard
+      assert_no_difference -> { dash.panels.count } do
+        post dashboard_panels_path(dash.slug),
+             params: { panel: { widget_type: "", title: "X",
+                                x: 0, y: 0, width: 3, height: 2, config: "{}" } },
+             as: :json
+      end
+      assert_response :unprocessable_entity
+    end
+
+    test "POST create accepts registered widget_type" do
+      dash = create_dashboard
+      assert_difference -> { dash.panels.count }, 1 do
+        post dashboard_panels_path(dash.slug),
+             params: { panel: { widget_type: "image", title: "Logo",
+                                x: 0, y: 0, width: 3, height: 2, config: "{}" } },
+             as: :json
+      end
+      assert_response :created
+    end
   end
 end

@@ -38,6 +38,8 @@ module Tiler
       self.partial     = "tiler/widgets/pie_chart"
       self.label       = "Pie Chart"
       self.query_class = PieChartQuery
+      self.default_config = { "aggregation" => "count" }
+      self.default_size   = { w: 4, h: 3 }
     end
   end
 end

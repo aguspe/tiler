@@ -31,6 +31,8 @@ module Tiler
       self.partial     = "tiler/widgets/list"
       self.label       = "List"
       self.query_class = ListQuery
+      self.default_config = { "limit" => 10 }
+      self.default_size   = { w: 4, h: 4 }
     end
   end
 end

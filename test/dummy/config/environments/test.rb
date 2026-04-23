@@ -50,4 +50,10 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Force dashboard turbo-frames to load eagerly so headless Chrome system tests
+  # don't race intersection-observer behavior. See cavekit-dashboard-layout.md R6.
+  config.after_initialize do
+    Tiler.configuration.eager_panel_load = true
+  end
 end

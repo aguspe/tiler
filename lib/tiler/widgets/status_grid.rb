@@ -54,6 +54,8 @@ module Tiler
       self.partial     = "tiler/widgets/status_grid"
       self.label       = "Status Grid"
       self.query_class = StatusGridQuery
+      self.default_config = {}
+      self.default_size   = { w: 6, h: 3 }
     end
   end
 end

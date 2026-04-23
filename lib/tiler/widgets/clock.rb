@@ -7,6 +7,8 @@ module Tiler
       self.partial     = "tiler/widgets/clock"
       self.label       = "Clock"
       self.query_class = nil
+      self.default_config = {}
+      self.default_size   = { w: 3, h: 2 }
 
       def data
         { timezone: config["timezone"], format: config["format"] || "24h" }

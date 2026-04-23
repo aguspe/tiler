@@ -23,6 +23,8 @@ module Tiler
       self.partial     = "tiler/widgets/metric"
       self.label       = "Single Metric"
       self.query_class = MetricQuery
+      self.default_config = { "aggregation" => "count" }
+      self.default_size   = { w: 3, h: 2 }
     end
   end
 end

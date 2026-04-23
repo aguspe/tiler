@@ -38,12 +38,9 @@ module Tiler
       visit dashboard_path(@dash.slug)
       meter_panel = @dash.panels.find_by(widget_type: "meter")
       assert_selector "turbo-frame#tiler_panel_#{meter_panel.id}", wait: 10
-      # Force-reload turbo frames in a retry loop so rendered widgets are in the DOM before axe scans.
-      5.times do
-        page.execute_script(%{document.querySelectorAll('turbo-frame').forEach(f => f.reload && f.reload())})
-        break if page.has_css?(".tiler-meter svg", wait: 4)
-      end
-      assert_selector ".tiler-meter svg", wait: 5
+      # With Tiler.configuration.eager_panel_load = true in the test env (cavekit
+      # dashboard-layout R6), turbo-frames render synchronously — no reload polling needed.
+      assert_selector ".tiler-meter svg", wait: 10
 
       # Skip rules that reflect known cosmetic/layout issues tracked outside this task
       # (layout dashboard chrome + SVG aria meter semantics — Agent A's lane):
@@ -67,15 +64,10 @@ module Tiler
 
     test "image panel renders alt text on <img>" do
       visit dashboard_path(@dash.slug)
-      # Ensure the turbo frame for the image panel exists, then force-reload it.
       img_panel = @dash.panels.find_by(widget_type: "image")
       assert_selector "turbo-frame#tiler_panel_#{img_panel.id}", wait: 10
-      # Reload in a retry loop — turbo-frame lazy-load can race with execute_script.
-      5.times do
-        page.execute_script(%{document.querySelectorAll('turbo-frame').forEach(f => f.reload && f.reload())})
-        break if page.has_css?("img.tiler-image[alt='Demo image']", wait: 4)
-      end
-      assert_selector "img.tiler-image[alt='Demo image']", wait: 5
+      # Eager panel load (cavekit dashboard-layout R6) replaces the prior reload-polling loop.
+      assert_selector "img.tiler-image[alt='Demo image']", wait: 10
     end
 
     test "comments widget has exactly one active item initially" do
@@ -88,11 +80,8 @@ module Tiler
 
       visit dashboard_path(focused_dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{panel.id}", wait: 10
-      10.times do
-        page.execute_script(%{document.querySelectorAll('turbo-frame').forEach(f => f.reload && f.reload())})
-        break if page.has_css?(".tiler-comments", wait: 3)
-      end
-      assert_selector ".tiler-comments", wait: 5
+      # Eager panel load (cavekit dashboard-layout R6) replaces the prior reload-polling loop.
+      assert_selector ".tiler-comments", wait: 10
       active_count = page.evaluate_script("document.querySelectorAll('.tiler-comment-active').length")
       assert_equal 1, active_count
     end

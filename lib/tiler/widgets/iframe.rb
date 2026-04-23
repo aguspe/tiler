@@ -7,6 +7,8 @@ module Tiler
       self.partial     = "tiler/widgets/iframe"
       self.label       = "Iframe"
       self.query_class = nil
+      self.default_config = {}
+      self.default_size   = { w: 4, h: 3 }
 
       def data
         { url: config["url"].to_s, sandbox: config["sandbox"] }
