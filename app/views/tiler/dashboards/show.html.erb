@@ -36,20 +36,26 @@
     <div class="tiler-dashboard-shell" data-tiler--dashboard-grid-target="shell">
       <aside class="tiler-widget-palette" data-tiler-palette aria-label="Widget palette">
         <h4 class="tiler-widget-palette-title">Widgets</h4>
-        <ul class="tiler-widget-palette-list">
+        <div class="tiler-widget-palette-list" role="list">
           <% Tiler.widgets.each do |type, klass| %>
-            <li class="tiler-widget-palette-item"
-                data-tiler-palette-widget
-                data-widget-type="<%= type %>"
-                data-default-w="<%= klass.default_size[:w] || klass.default_size["w"] %>"
-                data-default-h="<%= klass.default_size[:h] || klass.default_size["h"] %>"
-                data-default-config="<%= klass.default_config.to_json %>"
-                draggable="true"
-                tabindex="0">
+            <% w = klass.default_size[:w] || klass.default_size["w"] %>
+            <% h = klass.default_size[:h] || klass.default_size["h"] %>
+            <div class="tiler-widget-palette-item grid-stack-item"
+                 data-tiler-palette-widget
+                 data-widget-type="<%= type %>"
+                 data-default-w="<%= w %>"
+                 data-default-h="<%= h %>"
+                 data-default-config="<%= klass.default_config.to_json %>"
+                 gs-w="<%= w %>"
+                 gs-h="<%= h %>"
+                 draggable="true"
+                 tabindex="0"
+                 role="listitem"
+                 data-action="dragstart->tiler--dashboard-grid#paletteDragStart dragend->tiler--dashboard-grid#paletteDragEnd">
               <span class="tiler-widget-palette-label"><%= klass.label %></span>
-            </li>
+            </div>
           <% end %>
-        </ul>
+        </div>
       </aside>
 
       <div id="tiler-grid-stack-<%= @dashboard.id %>" class="grid-stack tiler-grid-stack"

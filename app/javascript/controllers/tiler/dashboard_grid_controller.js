@@ -92,6 +92,27 @@ export default class extends Controller {
     }
   }
 
+  // Captures which palette item the user grabbed. Gridstack v10's setupDragIn
+  // creates a fresh tile on drop — `newNode.el` does NOT carry our data-*
+  // attrs. So we capture the source on dragstart and read it back in handleDrop.
+  paletteDragStart(event) {
+    const src = event.currentTarget
+    if (!src) return
+    this._draggedWidget = {
+      widgetType: src.getAttribute("data-widget-type"),
+      title: (src.querySelector(".tiler-widget-palette-label")?.textContent || src.getAttribute("data-widget-type") || "").trim(),
+      defaultConfig: src.getAttribute("data-default-config") || "{}",
+      defaultW: parseInt(src.getAttribute("data-default-w"), 10) || 6,
+      defaultH: parseInt(src.getAttribute("data-default-h"), 10) || 2
+    }
+  }
+
+  paletteDragEnd() {
+    // Cleared on dragend regardless of whether drop succeeded — handleDrop
+    // already consumed the value if the drop landed on the grid.
+    this._draggedWidget = null
+  }
+
   // Toggle the widget palette open/closed. Replaces the prior Edit Layout
   // toggle — drag-and-drop is always live; the only thing the button gates
   // is showing the palette of widget types you can drop onto the grid.
@@ -129,23 +150,27 @@ export default class extends Controller {
 
   handleDrop(newNode) {
     if (!newNode || !newNode.el) return
-    const src = newNode.el
-    const widgetType = src.getAttribute("data-widget-type")
+    // Prefer the captured palette source (set by paletteDragStart) — gridstack
+    // v10's setupDragIn creates a fresh tile on drop that doesn't carry our
+    // data-* attrs. Fall back to reading attrs off the new tile in case a
+    // different drag-source pattern is used.
+    const dragged = this._draggedWidget
+    const widgetType = dragged?.widgetType || newNode.el.getAttribute("data-widget-type")
     if (!widgetType) {
       // Not a palette drop (likely an existing-panel move from another grid).
       return
     }
-    const defaultConfig = src.getAttribute("data-default-config") || "{}"
-    const labelEl = src.querySelector(".tiler-widget-palette-label")
-    const title = labelEl ? labelEl.textContent.trim() : widgetType
+    const defaultConfig = dragged?.defaultConfig || newNode.el.getAttribute("data-default-config") || "{}"
+    const title = dragged?.title || newNode.el.querySelector(".tiler-widget-palette-label")?.textContent.trim() || widgetType
 
     // Find any existing panels whose footprint overlaps the drop coords.
     // Drop-over-existing semantics: replace the underlying panel(s).
-    const replacedIds = this._panelsOverlapping(src, newNode)
+    const replacedIds = this._panelsOverlapping(newNode.el, newNode)
 
     // Remove the gridstack placeholder — the turbo_stream response appends
     // the real tile bound to the persisted panel record.
-    this.grid.removeWidget(src, false, false)
+    this.grid.removeWidget(newNode.el, false, false)
+    this._draggedWidget = null
 
     // Delete any panels we're replacing, then create the new one.
     Promise.all(replacedIds.map((id) => this._deletePanel(id)))
