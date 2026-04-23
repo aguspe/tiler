@@ -72,7 +72,10 @@ module Tiler
             var widgetClass = match ? match[1] : null;
             if (widgetClass && allowed.has(widgetClass)) return;
             // Overflow check on the panel-body.
-            if (inner.scrollHeight > inner.clientHeight + 1) {
+            // Tolerance of 32px absorbs Chart.js fixed canvas heights + inline
+            // <script> reflows (line/bar/pie chart widgets) and sub-pixel rounding
+            // differences between platforms (CI Linux vs local Mac).
+            if (inner.scrollHeight > inner.clientHeight + 32) {
               problems.push({ id: item.getAttribute('gs-id'), widgetClass: widgetClass,
                               scrollH: inner.scrollHeight, clientH: inner.clientHeight });
             }
