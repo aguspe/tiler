@@ -26,6 +26,18 @@ module Tiler
       slug
     end
 
+    # Per-dashboard settings stored as a JSON text column. Today: { tv_mode }.
+    # Returns the parsed Hash; safe even when the column is nil/blank.
+    def settings_hash
+      JSON.parse(settings.presence || "{}")
+    rescue JSON::ParserError
+      {}
+    end
+
+    def tv_mode?
+      !!settings_hash["tv_mode"]
+    end
+
     private
 
     def generate_slug

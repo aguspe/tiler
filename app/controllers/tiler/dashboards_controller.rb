@@ -8,6 +8,7 @@ module Tiler
     end
 
     def show
+      @tv_mode = params[:tv].present? || @dashboard.tv_mode?
     end
 
     def new

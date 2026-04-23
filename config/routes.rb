@@ -10,5 +10,15 @@ Tiler::Engine.routes.draw do
 
   resources :data_sources, only: [ :index, :show, :new, :create, :edit, :update, :destroy ], param: :id
 
+  get "/settings", to: "settings#show", as: :settings
+
   post "/ingest/:source_slug", to: "ingest#create", as: :ingest
+
+  namespace :api do
+    namespace :v1 do
+      resources :dashboards, param: :id, only: [ :index, :show, :create, :update, :destroy ] do
+        member { patch :settings }
+      end
+    end
+  end
 end

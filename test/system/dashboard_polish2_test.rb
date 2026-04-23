@@ -45,21 +45,9 @@ module Tiler
       assert_text(/paste any static JSON/i)
     end
 
-    test "dashboard header has a Settings menu" do
+    test "global nav has a Settings link" do
       visit dashboard_path(@dash.slug)
-      assert_selector "[data-tiler-settings]", wait: 5
-    end
-
-    test "Settings menu toggles the About panel" do
-      visit dashboard_path(@dash.slug)
-      assert_selector "[data-tiler-about]", visible: true, wait: 5
-
-      # Open settings and click "Hide About".
-      find("[data-tiler-settings] summary").click
-      hide = find("[data-tiler-about-toggle]", wait: 5)
-      hide.click
-
-      assert_selector "[data-tiler-about]", visible: :hidden, wait: 5
+      assert_selector ".tiler-nav a", text: "Settings", wait: 5
     end
   end
 end

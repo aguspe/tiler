@@ -8,33 +8,25 @@
      data-tiler--dashboard-grid-refresh-seconds-value="<%= @dashboard.refresh_seconds %>"
      data-tiler--dashboard-grid-disable-polling-value="<%= Tiler.configuration.disable_polling %>">
   <%= turbo_stream_from @dashboard %>
-  <div class="tiler-page-header">
-    <div>
-      <h1><%= @dashboard.name %></h1>
-      <% if @dashboard.description.present? %>
-        <p class="tiler-muted"><%= @dashboard.description %></p>
-      <% end %>
-      <div class="tiler-page-header-actions">
-        <button type="button"
-                class="tiler-btn tiler-btn-primary tiler-btn-sm"
-                data-tiler-add-panel
-                data-tiler--dashboard-grid-target="toggle"
-                data-action="click->tiler--dashboard-grid#togglePalette">Add Panel</button>
+  <% unless @tv_mode %>
+    <div class="tiler-page-header">
+      <div>
+        <h1><%= @dashboard.name %></h1>
+        <% if @dashboard.description.present? %>
+          <p class="tiler-muted"><%= @dashboard.description %></p>
+        <% end %>
+        <div class="tiler-page-header-actions">
+          <button type="button"
+                  class="tiler-btn tiler-btn-primary tiler-btn-sm"
+                  data-tiler-add-panel
+                  data-tiler--dashboard-grid-target="toggle"
+                  data-action="click->tiler--dashboard-grid#togglePalette">Add Panel</button>
+        </div>
       </div>
     </div>
-    <details class="tiler-settings" data-tiler-settings
-             data-controller="tiler--settings"
-             data-tiler--settings-storage-key-value="tiler.dashboard.<%= @dashboard.id %>.settings">
-      <summary class="tiler-btn tiler-btn-sm">Settings</summary>
-      <div class="tiler-settings-menu">
-        <button type="button"
-                class="tiler-settings-item"
-                data-tiler-about-toggle
-                data-action="click->tiler--settings#toggleAbout">Hide About</button>
-      </div>
-    </details>
-  </div>
+  <% end %>
 
+  <% unless @tv_mode %>
   <details class="tiler-about" data-tiler-about open>
     <summary>About this dashboard</summary>
     <p><strong>Tiler</strong> is a plug-and-play dashboards engine for Rails. Each tile is a <strong>widget</strong> that pulls from a <strong>data source</strong>.</p>
@@ -47,6 +39,7 @@
       <strong>Drag</strong> a tile to move it. <strong>Resize</strong> from the bottom-right corner. Click <strong>Add Panel</strong> to drop in new widgets from the palette. <strong>Edit</strong> each tile from its <em>Edit</em> link.
     </p>
   </details>
+  <% end %>
 
   <% panels = @dashboard.panels %>
 

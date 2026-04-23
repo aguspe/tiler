@@ -10,12 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_19_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_23_120000) do
   create_table "tiler_dashboards", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
     t.string "name", null: false
     t.integer "refresh_seconds", default: 0, null: false
+    t.text "settings"
     t.string "slug", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_tiler_dashboards_on_name", unique: true
