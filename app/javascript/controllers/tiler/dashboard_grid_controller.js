@@ -37,7 +37,9 @@ export default class extends Controller {
       margin: 0,
       staticGrid: true,
       float: true,
-      handle: ".tiler-panel-header",
+      // Whole tile is the drag handle in edit mode — header alone is too small to grab.
+      // .tiler-panel-body is excluded via CSS pointer-events on form inputs / editable elements.
+      handle: ".grid-stack-item-content",
       acceptWidgets: true
     }, this.gridTarget)
 

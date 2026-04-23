@@ -71,6 +71,9 @@ turbo-cable-stream-source { display: none !important; }
   z-index: 100;
 }
 .tiler-editing .tiler-panel-header { cursor: move; background: var(--primary-tint); }
+.tiler-editing .grid-stack-item-content { cursor: move; }
+.tiler-editing .tiler-panel { outline: 1px dashed var(--border-2); }
+.tiler-editing .tiler-panel:hover { outline-color: var(--primary); }
 .tiler-editing .tiler-panel { outline: 2px solid var(--primary); outline-offset: -2px; }
 .tiler-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
