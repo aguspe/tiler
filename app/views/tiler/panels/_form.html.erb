@@ -1,6 +1,8 @@
 <% widget_klass = Tiler.widgets[panel.widget_type] || Tiler.widgets[Tiler.widgets.types.first] %>
 <% example_config = widget_klass.example_config.to_json %>
 <% example_payload = widget_klass.example_payload.to_json %>
+<% preview_example = widget_klass.example_preview %>
+<% preview_json = preview_example ? { _preview: preview_example }.to_json : nil %>
 
 <%= form_with(model: panel,
               url: panel.persisted? ? dashboard_panel_path(@dashboard, panel) : dashboard_panels_path(@dashboard),
@@ -56,7 +58,16 @@
                 data-action="click->tiler--clipboard#copy">Copy</button>
       </div>
     <% end %>
-    <% if data_backed %>
+    <% if preview_json %>
+      <div class="tiler-example-config-row tiler-preview-example-row"
+           data-controller="tiler--clipboard"
+           data-tiler--clipboard-text-value="<%= preview_json %>">
+        <span class="tiler-hint">Preview example for <%= widget_klass.label %> (paste into Config to render without a data source):</span>
+        <code data-tiler-preview-example><%= preview_json %></code>
+        <button type="button" class="tiler-btn tiler-btn-sm" data-tiler-copy
+                data-action="click->tiler--clipboard#copy">Copy</button>
+      </div>
+    <% elsif data_backed %>
       <p class="tiler-hint">
         Tip: paste any static JSON here to <strong>preview</strong> the widget without a data source — useful for quickly trying different shapes.
       </p>

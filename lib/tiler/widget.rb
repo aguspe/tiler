@@ -68,5 +68,14 @@ module Tiler
     def self.example_payload
       { "status" => "ok", "value" => 42, "duration" => 142.3 }
     end
+
+    # An example data hash matching the shape this widget's partial expects.
+    # Wrapped under `{"_preview": ...}` and shown on the edit form so users
+    # can paste it into Config to test the widget without a data source.
+    # Return nil for config-only widgets (clock/text/iframe/image) — they
+    # render their own placeholders and don't benefit from preview JSON.
+    def self.example_preview
+      nil
+    end
   end
 end

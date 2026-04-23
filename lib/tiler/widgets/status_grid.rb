@@ -56,6 +56,29 @@ module Tiler
       self.query_class = StatusGridQuery
       self.default_config = {}
       self.default_size   = { w: 6, h: 3 }
+
+      def self.example_config
+        { "row_column" => "suite", "status_column" => "status", "limit_rows" => 20 }
+      end
+
+      def self.example_payload
+        { "suite" => "checkout", "status" => "pass" }
+      end
+
+      def self.example_preview
+        {
+          "rows" => [
+            { "name" => "checkout",  "status" => "pass", "last_status" => "pass",
+              "pass" => 47, "fail" => 0,  "warn" => 0,  "total" => 47, "last_run" => "2026-04-23 09:30" },
+            { "name" => "search",    "status" => "warn", "last_status" => "skipped",
+              "pass" => 38, "fail" => 0,  "warn" => 4,  "total" => 42, "last_run" => "2026-04-23 09:25" },
+            { "name" => "payments",  "status" => "fail", "last_status" => "error",
+              "pass" => 22, "fail" => 8,  "warn" => 1,  "total" => 31, "last_run" => "2026-04-23 09:18" },
+            { "name" => "auth",      "status" => "pass", "last_status" => "ok",
+              "pass" => 51, "fail" => 0,  "warn" => 0,  "total" => 51, "last_run" => "2026-04-23 09:32" }
+          ]
+        }
+      end
     end
   end
 end

@@ -69,6 +69,29 @@ module Tiler
       self.query_class = CommentsQuery
       self.default_config = {}
       self.default_size   = { w: 4, h: 3 }
+
+      def self.example_config
+        { "quote_column" => "quote", "name_column" => "name", "rotate_seconds" => 8, "limit" => 10 }
+      end
+
+      def self.example_payload
+        { "quote" => "Tiler turned our spreadsheet into a wallboard in an afternoon.",
+          "name"  => "Avery from Ops" }
+      end
+
+      def self.example_preview
+        {
+          "items" => [
+            { "quote" => "Tiler turned our spreadsheet into a wallboard in an afternoon.",
+              "name"  => "Avery from Ops", "avatar" => nil },
+            { "quote" => "Finally a status board the whole team actually looks at.",
+              "name"  => "Jordan, SRE",     "avatar" => nil },
+            { "quote" => "Drag-and-drop widgets are surprisingly addictive.",
+              "name"  => "Sam, PM",         "avatar" => nil }
+          ],
+          "rotate_seconds" => 8
+        }
+      end
     end
   end
 end

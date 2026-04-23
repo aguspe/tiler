@@ -28,6 +28,18 @@ module Tiler
       self.query_class = TableQuery
       self.default_config = { "limit" => 10 }
       self.default_size   = { w: 6, h: 4 }
+
+      def self.example_preview
+        {
+          "columns" => %w[status duration recorded_at],
+          "rows" => [
+            [ "ok",    142.3, "2026-04-23 09:00" ],
+            [ "ok",    201.0, "2026-04-23 09:05" ],
+            [ "error", 3500.0, "2026-04-23 09:07" ]
+          ],
+          "total" => 3, "limit" => 10
+        }
+      end
     end
   end
 end

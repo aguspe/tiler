@@ -33,6 +33,14 @@ module Tiler
       self.query_class = ListQuery
       self.default_config = { "limit" => 10 }
       self.default_size   = { w: 4, h: 4 }
+
+      def self.example_preview
+        { "items" => [
+            { "label" => "ok",    "value" => 47 },
+            { "label" => "warn",  "value" => 12 },
+            { "label" => "error", "value" => 3 }
+        ] }
+      end
     end
   end
 end

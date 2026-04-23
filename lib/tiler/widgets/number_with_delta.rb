@@ -53,6 +53,14 @@ module Tiler
       self.query_class = NumberWithDeltaQuery
       self.default_config = { "aggregation" => "count", "time_window" => "24h", "previous_window" => "24h" }
       self.default_size   = { w: 3, h: 2 }
+
+      def self.example_preview
+        {
+          "value" => 142, "previous" => 100, "delta" => 42.0, "pct" => 42.0,
+          "label" => "Sample metric", "aggregation" => "count",
+          "time_window" => "24h", "direction" => "up"
+        }
+      end
     end
   end
 end

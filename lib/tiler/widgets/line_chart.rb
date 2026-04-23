@@ -77,6 +77,20 @@ module Tiler
       def self.example_payload
         { "status" => "ok", "duration" => 142.3 }
       end
+
+      def self.example_preview
+        {
+          "labels" => %w[Mon Tue Wed Thu Fri Sat Sun],
+          "datasets" => [
+            { "label" => "duration",
+              "data" => [ 142, 188, 167, 201, 175, 220, 199 ],
+              "borderColor" => "#3b82f6",
+              "backgroundColor" => "#3b82f633",
+              "tension" => 0.3, "fill" => false }
+          ],
+          "options" => {}
+        }
+      end
     end
   end
 end

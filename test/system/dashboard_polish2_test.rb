@@ -39,10 +39,11 @@ module Tiler
       assert_no_text(/paste any static JSON/i)
     end
 
-    test "data-backed widgets (metric) still show the example snippet + preview hint" do
+    test "data-backed widgets (metric) still show the example snippet + preview row" do
       visit edit_dashboard_panel_path(@dash, @metric)
       assert_selector "[data-tiler-example-config]", wait: 5
-      assert_text(/paste any static JSON/i)
+      assert_selector "[data-tiler-preview-example]", wait: 5
+      assert_text(/preview example/i)
     end
 
     test "global nav has a Settings link" do

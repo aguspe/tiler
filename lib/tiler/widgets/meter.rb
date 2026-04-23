@@ -51,6 +51,18 @@ module Tiler
       self.query_class = MeterQuery
       self.default_config = {}
       self.default_size   = { w: 4, h: 3 }
+
+      def self.example_config
+        { "value_column" => "cpu", "aggregation" => "last", "min" => 0, "max" => 100, "suffix" => "%" }
+      end
+
+      def self.example_payload
+        { "cpu" => 64 }
+      end
+
+      def self.example_preview
+        { "value" => 64, "min" => 0, "max" => 100, "prefix" => nil, "suffix" => "%" }
+      end
     end
   end
 end

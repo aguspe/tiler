@@ -54,6 +54,18 @@ module Tiler
       def self.example_payload
         { "status" => "ok" }
       end
+
+      def self.example_preview
+        {
+          "labels" => %w[ok warn error],
+          "datasets" => [
+            { "data" => [ 70, 20, 10 ],
+              "backgroundColor" => [ "#3b82f6cc", "#f59e0bcc", "#ef4444cc" ],
+              "borderColor" => [ "#3b82f6", "#f59e0b", "#ef4444" ],
+              "borderWidth" => 2 }
+          ]
+        }
+      end
     end
   end
 end

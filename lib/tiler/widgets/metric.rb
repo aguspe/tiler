@@ -34,6 +34,10 @@ module Tiler
       def self.example_payload
         { "status" => "ok", "duration" => 142.3 }
       end
+
+      def self.example_preview
+        { "value" => 142, "label" => "Sample metric", "aggregation" => "avg", "time_window" => "24h" }
+      end
     end
   end
 end
