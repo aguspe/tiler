@@ -1,4 +1,8 @@
 <% content_for :title, "Settings" %>
+<% if @last_dashboard %>
+  <%= link_to "← Back to #{@last_dashboard.name}", dashboard_path(@last_dashboard.slug),
+        class: "tiler-link", data: { tiler_back_dashboard: "" } %>
+<% end %>
 <h1>Settings</h1>
 <p class="tiler-muted">Per-dashboard preferences. Changes save instantly via the Tiler API.</p>
 

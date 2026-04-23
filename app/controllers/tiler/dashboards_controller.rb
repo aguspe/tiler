@@ -9,6 +9,7 @@ module Tiler
 
     def show
       @tv_mode = params[:tv].present? || @dashboard.tv_mode?
+      session[:tiler_last_dashboard_slug] = @dashboard.slug
     end
 
     def new
