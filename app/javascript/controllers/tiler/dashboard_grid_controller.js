@@ -131,23 +131,80 @@ export default class extends Controller {
     const labelEl = src.querySelector(".tiler-widget-palette-label")
     const title = labelEl ? labelEl.textContent.trim() : widgetType
 
-    // Remove the placeholder gridstack created — the turbo_stream response
-    // appends the real tile bound to the persisted panel record.
+    // Find any existing panels whose footprint overlaps the drop coords.
+    // Drop-over-existing semantics: replace the underlying panel(s).
+    const replacedIds = this._panelsOverlapping(src, newNode)
+
+    // Remove the gridstack placeholder — the turbo_stream response appends
+    // the real tile bound to the persisted panel record.
     this.grid.removeWidget(src, false, false)
 
+    // Delete any panels we're replacing, then create the new one.
+    Promise.all(replacedIds.map((id) => this._deletePanel(id)))
+      .then(() => this._createPanel({ widgetType, title, defaultConfig, node: newNode }))
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.warn("Tiler: replace-on-drop error", err)
+      })
+  }
+
+  // Return ids of existing panels whose grid coords overlap the dropped node.
+  // Excludes the dropped placeholder itself.
+  _panelsOverlapping(droppedEl, newNode) {
+    const x1 = newNode.x, y1 = newNode.y
+    const x2 = newNode.x + newNode.w, y2 = newNode.y + newNode.h
+    const ids = []
+    this.gridTarget.querySelectorAll(".grid-stack-item[gs-id]").forEach((item) => {
+      if (item === droppedEl) return
+      const ix = parseInt(item.getAttribute("gs-x"), 10)
+      const iy = parseInt(item.getAttribute("gs-y"), 10)
+      const iw = parseInt(item.getAttribute("gs-w"), 10)
+      const ih = parseInt(item.getAttribute("gs-h"), 10)
+      if (Number.isNaN(ix) || Number.isNaN(iy) || Number.isNaN(iw) || Number.isNaN(ih)) return
+      const overlaps = ix < x2 && ix + iw > x1 && iy < y2 && iy + ih > y1
+      if (!overlaps) return
+      const id = item.getAttribute("gs-id")
+      if (id) ids.push(id)
+    })
+    return ids
+  }
+
+  _deletePanel(id) {
+    const url = this._panelDeleteUrl(id)
+    if (!url) return Promise.resolve()
+    return fetch(url, {
+      method: "DELETE",
+      headers: {
+        "X-CSRF-Token": this.csrfValue,
+        "Accept": "text/vnd.turbo-stream.html"
+      },
+      credentials: "same-origin"
+    }).then((res) => {
+      if (!res.ok) return
+      // Remove the displaced tile from gridstack + DOM.
+      const el = this.gridTarget.querySelector(`.grid-stack-item[gs-id='${id}']`)
+      if (el) this.grid.removeWidget(el, true, false)
+    })
+  }
+
+  _panelDeleteUrl(id) {
+    const base = this.panelsUrlValue
+    if (!base) return null
+    return `${base}/${id}`
+  }
+
+  _createPanel({ widgetType, title, defaultConfig, node }) {
+    const url = this.panelsUrlValue
+    if (!url) return Promise.resolve()
     const fd = new FormData()
     fd.append("panel[widget_type]", widgetType)
     fd.append("panel[title]", title)
-    fd.append("panel[x]", newNode.x)
-    fd.append("panel[y]", newNode.y)
-    fd.append("panel[width]", newNode.w)
-    fd.append("panel[height]", newNode.h)
+    fd.append("panel[x]", node.x)
+    fd.append("panel[y]", node.y)
+    fd.append("panel[width]", node.w)
+    fd.append("panel[height]", node.h)
     fd.append("panel[config]", defaultConfig)
-
-    const url = this.panelsUrlValue || (this.hasGridTarget ? this.gridTarget.dataset.tilerPanelsUrl : null)
-    if (!url) return
-
-    fetch(url, {
+    return fetch(url, {
       method: "POST",
       headers: {
         "X-CSRF-Token": this.csrfValue,
@@ -173,9 +230,6 @@ export default class extends Controller {
           })
         }, 100)
       })
-    }).catch((err) => {
-      // eslint-disable-next-line no-console
-      console.warn("Tiler: panel create error", err)
     })
   }
 }
