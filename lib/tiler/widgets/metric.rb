@@ -29,6 +29,14 @@ module Tiler
       def empty?(data)
         data.nil? || panel.data_source.nil?
       end
+
+      def self.example_config
+        { "aggregation" => "avg", "value_column" => "duration", "time_window" => "24h" }
+      end
+
+      def self.example_payload
+        { "status" => "ok", "duration" => 142.3 }
+      end
     end
   end
 end

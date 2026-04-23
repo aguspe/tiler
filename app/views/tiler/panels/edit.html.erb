@@ -1,6 +1,3 @@
 <% content_for :title, "Edit Panel" %>
 <h1>Edit Panel</h1>
 <%= render "form", panel: @panel %>
-<%= button_to "Delete Panel", dashboard_panel_path(@dashboard, @panel), method: :delete,
-              class: "tiler-btn tiler-btn-danger",
-              data: { turbo_confirm: "Remove panel?" } %>

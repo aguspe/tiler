@@ -6,9 +6,11 @@ module Tiler
 
     def new
       next_y = (@dashboard.panels.maximum(:y) || -1) + 1
+      requested_type = params.dig(:panel, :widget_type).presence
+      widget_type = Tiler.widgets[requested_type] ? requested_type : Tiler.widgets.types.first
       @panel = @dashboard.panels.build(
         width: 6, height: 2, x: 0, y: next_y,
-        widget_type: Tiler.widgets.types.first
+        widget_type: widget_type
       )
       @data_sources = DataSource.active.by_name
     end

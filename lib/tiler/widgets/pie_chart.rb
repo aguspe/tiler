@@ -45,6 +45,14 @@ module Tiler
         data.nil? || data[:labels].blank? || data[:datasets].blank? ||
           data[:datasets].all? { |ds| Array(ds[:data]).all? { |v| v.nil? || v.zero? } }
       end
+
+      def self.example_config
+        { "group_by" => "status", "aggregation" => "count" }
+      end
+
+      def self.example_payload
+        { "status" => "ok" }
+      end
     end
   end
 end

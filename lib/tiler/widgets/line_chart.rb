@@ -67,6 +67,15 @@ module Tiler
         data.nil? || data[:datasets].blank? ||
           data[:datasets].all? { |ds| Array(ds[:data]).all? { |v| v.nil? || v.zero? } }
       end
+
+      def self.example_config
+        { "value_column" => "duration", "aggregation" => "avg",
+          "bucket" => "day", "time_window" => "7d" }
+      end
+
+      def self.example_payload
+        { "status" => "ok", "duration" => 142.3 }
+      end
     end
   end
 end

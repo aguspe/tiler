@@ -22,7 +22,18 @@
     <%= link_to "Data Sources", data_sources_path, class: "tiler-nav-link" %>
   </nav>
   <% flash.each do |k, msg| %>
-    <div class="tiler-flash tiler-flash-<%= k %>"><%= msg %></div>
+    <div class="tiler-flash tiler-flash-<%= k %>"
+         data-controller="tiler--flash"
+         data-tiler--flash-timeout-value="5000"
+         role="status"
+         aria-live="polite">
+      <span class="tiler-flash-message"><%= msg %></span>
+      <button type="button"
+              class="tiler-flash-close"
+              data-tiler-flash-close
+              data-action="click->tiler--flash#dismiss"
+              aria-label="Dismiss">&times;</button>
+    </div>
   <% end %>
   <main class="tiler-main"><%= yield %></main>
 </body>

@@ -116,6 +116,27 @@ turbo-cable-stream-source { display: none !important; }
 .tiler-panel-empty p { margin: 0; }
 .tiler-btn-sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
 
+/* Form actions row — Update on the left, Delete on the right */
+.tiler-form-actions { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1rem; }
+.tiler-form-actions form { margin: 0; }
+
+/* Inline example config snippet under the JSON textarea */
+.tiler-example-config-row { display: flex; align-items: baseline; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap; }
+.tiler-example-config-row code { background: var(--paper-3); padding: 2px 6px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-2); white-space: pre; }
+
+/* Info disclosure — webhook URL + curl example */
+.tiler-info { background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-top: 1rem; }
+.tiler-info > summary { cursor: pointer; font-weight: var(--fw-semi); color: var(--ink-2); }
+.tiler-info[open] > summary { margin-bottom: 0.75rem; }
+.tiler-info p { margin: 0.5rem 0 0.25rem; color: var(--ink-2); font-size: 0.875rem; }
+.tiler-code-block { background: var(--paper-3); padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-2); white-space: pre-wrap; word-break: break-all; margin: 0.25rem 0 0.5rem; overflow-x: auto; }
+
+/* Flash banner: include a close button */
+.tiler-flash { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.tiler-flash-message { flex: 1; }
+.tiler-flash-close { background: transparent; border: 0; color: inherit; font-size: 1.25rem; line-height: 1; cursor: pointer; padding: 0 0.25rem; opacity: 0.7; }
+.tiler-flash-close:hover { opacity: 1; }
+
 .tiler-skeleton { background: var(--paper-2); padding: 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); animation: tiler-pulse 1.5s ease-in-out infinite; height: 100%; }
 .tiler-skeleton-title { height: 1rem; background: var(--border); border-radius: var(--radius-sm); width: 40%; margin-bottom: 1rem; }
 .tiler-skeleton-body { height: 8rem; background: var(--paper-3); border-radius: var(--radius-sm); }

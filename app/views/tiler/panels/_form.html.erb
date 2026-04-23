@@ -1,6 +1,10 @@
+<% widget_klass = Tiler.widgets[panel.widget_type] || Tiler.widgets[Tiler.widgets.types.first] %>
+<% example_config = widget_klass.example_config.to_json %>
+<% example_payload = widget_klass.example_payload.to_json %>
+
 <%= form_with(model: panel,
               url: panel.persisted? ? dashboard_panel_path(@dashboard, panel) : dashboard_panels_path(@dashboard),
-              local: true, data: { turbo: false }, class: "tiler-form") do |f| %>
+              local: true, data: { turbo: false }, class: "tiler-form", id: "tiler-panel-form") do |f| %>
   <% if panel.errors.any? %>
     <div class="tiler-form-errors">
       <ul><% panel.errors.full_messages.each do |m| %><li><%= m %></li><% end %></ul>
@@ -34,17 +38,45 @@
       <%= f.number_field :height, min: 1, max: 12 %>
     </div>
   </div>
-  <p class="tiler-hint">You can also drag & resize panels directly on the dashboard.</p>
+  <p class="tiler-hint">You can also drag &amp; resize panels directly on the dashboard.</p>
 
   <div class="tiler-field">
     <%= f.label :config, "Config (JSON)" %>
-    <%= f.text_area :config, rows: 8, placeholder: '{"aggregation":"count","time_window":"7d"}' %>
-    <p class="tiler-hint">
-      Examples:
-      metric → <code>{"aggregation":"count","time_window":"24h"}</code>
-      line_chart → <code>{"value_column":"duration","aggregation":"avg","bucket":"day","time_window":"7d"}</code>
-    </p>
+    <%= f.text_area :config, rows: 8, placeholder: example_config %>
+    <div class="tiler-example-config-row">
+      <span class="tiler-hint">Example for <%= widget_klass.label %>:</span>
+      <code data-tiler-example-config><%= example_config %></code>
+    </div>
   </div>
 
-  <%= f.submit class: "tiler-btn tiler-btn-primary" %>
+  <details class="tiler-info" data-tiler-info open>
+    <summary>How do I push data into this widget?</summary>
+    <% data_source = panel.data_source || (panel.tiler_data_source_id && Tiler::DataSource.find_by(id: panel.tiler_data_source_id)) %>
+    <% if data_source.nil? %>
+      <p class="tiler-muted">No data source attached. Pick one above (or create one under Data Sources) to enable webhook ingestion.</p>
+    <% else %>
+      <p>Push records via HTTP POST to:</p>
+      <pre class="tiler-code-block"><%= request.protocol + request.host_with_port %>/tiler/ingest/<%= data_source.slug %></pre>
+      <p>Header (treat as an API key):</p>
+      <pre class="tiler-code-block">X-Tiler-Token: <%= data_source.webhook_token %></pre>
+      <p>Sample payload for the <strong><%= widget_klass.label %></strong> widget:</p>
+      <pre class="tiler-code-block"><%= JSON.pretty_generate(JSON.parse(example_payload)) %></pre>
+      <p>Example curl:</p>
+      <pre class="tiler-code-block">curl -X POST <%= request.protocol + request.host_with_port %>/tiler/ingest/<%= data_source.slug %> \
+  -H "X-Tiler-Token: <%= data_source.webhook_token %>" \
+  -H "Content-Type: application/json" \
+  -d '<%= example_payload %>'</pre>
+    <% end %>
+  </details>
 <% end %>
+
+<div class="tiler-form-actions">
+  <button type="submit" form="tiler-panel-form" class="tiler-btn tiler-btn-primary">
+    <%= panel.persisted? ? "Update Panel" : "Create Panel" %>
+  </button>
+  <% if panel.persisted? %>
+    <%= button_to "Delete Panel", dashboard_panel_path(@dashboard, panel), method: :delete,
+                  class: "tiler-btn tiler-btn-danger",
+                  data: { turbo_confirm: "Remove panel?" } %>
+  <% end %>
+</div>

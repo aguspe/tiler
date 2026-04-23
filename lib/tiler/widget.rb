@@ -39,5 +39,21 @@ module Tiler
     def empty?(data)
       false
     end
+
+    # An example config object for this widget. Shown verbatim on the panel
+    # edit form so users can copy-paste a working starting point. Default
+    # falls back to the class-level default_config; override per widget for
+    # richer examples (e.g. specifying value_column / group_by for charts).
+    def self.example_config
+      default_config
+    end
+
+    # An example payload — one record's JSON shape — that this widget can
+    # render against. Used to scaffold sample curl commands on the edit
+    # page. Default returns a minimal {status: "ok"} which most widgets
+    # can render with default config.
+    def self.example_payload
+      { "status" => "ok", "value" => 42, "duration" => 142.3 }
+    end
   end
 end
