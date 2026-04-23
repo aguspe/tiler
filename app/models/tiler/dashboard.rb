@@ -38,15 +38,33 @@ module Tiler
       !!settings_hash["tv_mode"]
     end
 
-    # Personalization (per-dashboard, persisted in settings JSON):
-    #   background_color: "#rrggbb" / "#rgb" — applied to the dashboard's
-    #   --paper token via inline style. Invalid input returns nil so the
-    #   layout falls back to the design system default.
+    # Theme — per-dashboard CSS token overrides stored in settings JSON.
+    # Each accessor returns a validated hex color string or nil (so the
+    # design-system default applies). Tokens are emitted as inline style on
+    # the .tiler-dashboard wrapper so descendants inherit naturally.
+    #
+    #   page_bg        -> --paper   (page background)
+    #   tile_bg        -> --paper-2 (panel surface)
+    #   tile_header_bg -> --paper-3 (panel header strip)
+    #   gutter_bg      -> --border  (grid gutters)
     HEX_COLOR_RE = /\A#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})\z/i
+    THEME_KEYS = %w[page_bg tile_bg tile_header_bg gutter_bg].freeze
 
-    def background_color
-      c = settings_hash["background_color"].to_s.strip
-      c.match?(HEX_COLOR_RE) ? c : nil
+    def page_bg;        theme_color("page_bg");        end
+    def tile_bg;        theme_color("tile_bg");        end
+    def tile_header_bg; theme_color("tile_header_bg"); end
+    def gutter_bg;      theme_color("gutter_bg");      end
+
+    # Returns { token => hex } for every set theme key, ready to splat into
+    # an inline style attribute. Empty hash when nothing is themed.
+    def theme_inline_style
+      mapping = { "page_bg" => "--paper", "tile_bg" => "--paper-2",
+                  "tile_header_bg" => "--paper-3", "gutter_bg" => "--border" }
+      pairs = THEME_KEYS.filter_map do |key|
+        v = theme_color(key)
+        v ? "#{mapping[key]}: #{v};" : nil
+      end
+      pairs.join(" ")
     end
 
     # logo_url: http(s) URL only — rejected when scheme is anything else
@@ -59,6 +77,11 @@ module Tiler
     end
 
     private
+
+    def theme_color(key)
+      c = settings_hash[key].to_s.strip
+      c.match?(HEX_COLOR_RE) ? c : nil
+    end
 
     def generate_slug
       self.slug = name.to_s.downcase.gsub(/[^a-z0-9]+/, "-").gsub(/\A-|-\z/, "")

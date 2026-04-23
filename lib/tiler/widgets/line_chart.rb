@@ -18,7 +18,10 @@ module Tiler
         labels  = buckets.map { |b| format_label(b, bucket) }
 
         datasets = series.each_with_index.map do |s, i|
-          color = chart_colors[i % chart_colors.size]
+          # Per-series color wins over palette/color override, which wins over
+          # the default chart palette. Lets you pin a specific series (e.g.
+          # "errors must always be red") regardless of where it sits.
+          color = s[:color] || chart_colors[i % chart_colors.size]
           data  = buckets.map { |b| aggregate_for_bucket(b, bucket, s[:column], s[:agg]) }
           { label: s[:label], data: data, borderColor: color,
             backgroundColor: "#{color}33", tension: 0.3, fill: false, spanGaps: true }
@@ -37,7 +40,8 @@ module Tiler
           {
             label:  (s["label"] || s[:label] || column.to_s.humanize).to_s,
             column: column.to_s,
-            agg:    (s["agg"] || s[:agg] || DEFAULT_AGG).to_s
+            agg:    (s["agg"] || s[:agg] || DEFAULT_AGG).to_s,
+            color:  sanitize_color(s["color"] || s[:color])
           }
         end
       end
@@ -93,6 +97,9 @@ module Tiler
         data.nil? || data[:datasets].blank? ||
           data[:datasets].all? { |ds| Array(ds[:data]).all? { |v| v.nil? || v.zero? } }
       end
+
+      def self.supports_color_config?;   true; end
+      def self.supports_palette_config?; true; end
 
       def self.example_config
         {

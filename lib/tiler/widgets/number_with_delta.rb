@@ -33,7 +33,8 @@ module Tiler
           aggregation: agg,
           time_window: config["time_window"],
           direction:   (delta.to_f.positive? ? :up : (delta.to_f.negative? ? :down : :flat)),
-          spark:       sparkline_points(col, agg)
+          spark:       sparkline_points(col, agg),
+          color:       sanitize_color(config["color"])
         }
       end
 
@@ -81,8 +82,12 @@ module Tiler
           "value" => 142, "previous" => 100, "delta" => 42.0, "pct" => 42.0,
           "label" => "Sample metric", "aggregation" => "count",
           "time_window" => "24h", "direction" => "up",
-          "spark" => [ 96, 97, 97, 98, 98, 99, 98.7 ]
+          "spark" => [ 96, 97, 97, 98, 98, 99, 98.7 ], "color" => nil
         }
+      end
+
+      def self.supports_color_config?
+        true
       end
     end
   end

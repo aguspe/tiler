@@ -46,7 +46,8 @@
       <% if pct > 0 %>
         <path class="tiler-meter-fill"
               d="M <%= bg_start_x.round(2) %> <%= bg_start_y.round(2) %> A <%= r %> <%= r %> 0 <%= large_fg %> 1 <%= fg_end_x.round(2) %> <%= fg_end_y.round(2) %>"
-              fill="none" stroke-width="14" stroke-linecap="round"></path>
+              fill="none" stroke-width="14" stroke-linecap="round"
+              <% if data[:color] %>style="stroke: <%= data[:color] %>;"<% end %>></path>
       <% end %>
       <text x="100" y="115" text-anchor="middle" class="tiler-meter-value" font-size="28" font-weight="600"><%= data[:prefix] %><%= display_value %><%= data[:suffix] %></text>
     </svg>

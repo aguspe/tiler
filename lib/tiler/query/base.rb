@@ -74,8 +74,30 @@ module Tiler
                   .distinct.pluck(Arel.sql(json_extract(col))).compact
       end
 
+      # The default visualization palette. Per-panel `palette` config (array
+      # of hex) or `color` config (single hex broadcast across N entries)
+      # overrides it; otherwise the design-system defaults win.
+      DEFAULT_CHART_COLORS = %w[
+        #3b82f6 #10b981 #f59e0b #ef4444 #8b5cf6 #06b6d4 #f97316 #84cc16 #ec4899 #6366f1
+      ].freeze
+      HEX_COLOR_RE = /\A#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})\z/i
+
       def chart_colors
-        %w[#3b82f6 #10b981 #f59e0b #ef4444 #8b5cf6 #06b6d4 #f97316 #84cc16 #ec4899 #6366f1]
+        palette = sanitize_palette(config["palette"])
+        return palette if palette.any?
+        single = sanitize_color(config["color"])
+        return [ single ] if single
+        DEFAULT_CHART_COLORS
+      end
+
+      def sanitize_color(c)
+        return nil unless c.is_a?(String)
+        s = c.strip
+        s.match?(HEX_COLOR_RE) ? s : nil
+      end
+
+      def sanitize_palette(arr)
+        Array(arr).filter_map { |c| sanitize_color(c) }
       end
     end
   end

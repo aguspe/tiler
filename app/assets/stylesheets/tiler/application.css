@@ -184,6 +184,8 @@ body.tiler-tv .tiler-grid-stack { border: none; }
 .tiler-input-saved  { border-color: var(--success) !important; }
 /* Page-header logo (per-dashboard personalization) */
 .tiler-page-header-logo { max-height: 36px; max-width: 160px; width: auto; height: auto; object-fit: contain; }
+/* Per-widget color override row on the panel edit form */
+.tiler-color-overrides-row { display: flex; align-items: flex-end; gap: 0.75rem; flex-wrap: wrap; }
 /* Inline-editable dashboard title — double-click to rename. */
 .tiler-dashboard-title { cursor: text; padding: 2px 6px; margin: -2px -6px; border-radius: var(--radius-sm); transition: background var(--dur-fast) var(--ease-snap); outline: none; }
 .tiler-dashboard-title:hover { background: var(--paper-3); }

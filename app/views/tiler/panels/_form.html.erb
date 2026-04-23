@@ -45,6 +45,43 @@
   <% has_example = widget_klass.example_config.is_a?(Hash) && widget_klass.example_config.any? %>
   <% data_backed = !widget_klass.query_class.nil? %>
 
+  <% if widget_klass.supports_color_config? || widget_klass.supports_palette_config? %>
+    <% existing_color   = panel.parsed_config["color"] %>
+    <% existing_palette = Array(panel.parsed_config["palette"]).join(",") %>
+    <div class="tiler-field tiler-color-overrides"
+         data-controller="tiler--color-config">
+      <label>Tile color override</label>
+      <div class="tiler-color-overrides-row">
+        <% if widget_klass.supports_color_config? %>
+          <label class="tiler-field-inline">
+            <span>Single color</span>
+            <input type="color"
+                   data-tiler-widget-color
+                   data-tiler--color-config-target="color"
+                   data-action="input->tiler--color-config#applySingle"
+                   value="<%= existing_color || '#3b82f6' %>">
+          </label>
+        <% end %>
+        <% if widget_klass.supports_palette_config? %>
+          <label class="tiler-field-inline tiler-field-inline-stretch">
+            <span>Palette (comma-separated hex)</span>
+            <input type="text"
+                   data-tiler-widget-palette
+                   data-tiler--color-config-target="palette"
+                   data-action="input->tiler--color-config#applyPalette"
+                   placeholder="#3b82f6, #10b981, #f59e0b"
+                   value="<%= existing_palette %>">
+          </label>
+        <% end %>
+        <button type="button"
+                class="tiler-btn tiler-btn-sm"
+                data-tiler-widget-color-clear
+                data-action="click->tiler--color-config#clear">Reset</button>
+      </div>
+      <p class="tiler-hint">Overrides the default chart palette for this tile only. Leave blank to use the dashboard / design-system colors.</p>
+    </div>
+  <% end %>
+
   <div class="tiler-field">
     <%= f.label :config, "Config (JSON)" %>
     <%= f.text_area :config, rows: 8, placeholder: (has_example ? example_config : "{}") %>

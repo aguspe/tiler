@@ -35,17 +35,25 @@
             </label>
           </div>
           <div class="tiler-settings-personalization-row">
-            <label class="tiler-field-inline">
-              <span>Background</span>
-              <input type="color"
-                     value="<%= dash.background_color || '#f5f4ee' %>"
-                     data-tiler-bg-color
-                     data-controller="tiler--settings-input"
-                     data-tiler--settings-input-url-value="<%= url %>"
-                     data-tiler--settings-input-csrf-value="<%= form_authenticity_token %>"
-                     data-tiler--settings-input-key-value="background_color"
-                     data-action="input->tiler--settings-input#change">
-            </label>
+            <% theme_pickers = [
+              [ "Page",         "page_bg",        dash.page_bg,        "#f5f4ee" ],
+              [ "Tile",         "tile_bg",        dash.tile_bg,        "#fbfaf6" ],
+              [ "Tile header",  "tile_header_bg", dash.tile_header_bg, "#ecebe4" ],
+              [ "Gutter",       "gutter_bg",      dash.gutter_bg,      "#d8d6cc" ]
+            ] %>
+            <% theme_pickers.each do |label, key, value, default| %>
+              <label class="tiler-field-inline">
+                <span><%= label %></span>
+                <input type="color"
+                       value="<%= value || default %>"
+                       data-tiler-theme-color="<%= key %>"
+                       data-controller="tiler--settings-input"
+                       data-tiler--settings-input-url-value="<%= url %>"
+                       data-tiler--settings-input-csrf-value="<%= form_authenticity_token %>"
+                       data-tiler--settings-input-key-value="<%= key %>"
+                       data-action="input->tiler--settings-input#change">
+              </label>
+            <% end %>
             <label class="tiler-field-inline tiler-field-inline-stretch">
               <span>Logo URL (https)</span>
               <input type="url"
@@ -58,6 +66,13 @@
                      data-tiler--settings-input-key-value="logo_url"
                      data-action="input->tiler--settings-input#change">
             </label>
+            <button type="button"
+                    class="tiler-btn tiler-btn-sm"
+                    data-tiler-reset-theme
+                    data-controller="tiler--reset-theme"
+                    data-tiler--reset-theme-url-value="<%= url %>"
+                    data-tiler--reset-theme-csrf-value="<%= form_authenticity_token %>"
+                    data-action="click->tiler--reset-theme#reset">Reset theme</button>
           </div>
         </li>
       <% end %>

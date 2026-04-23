@@ -83,5 +83,20 @@ module Tiler
     def self.example_preview
       nil
     end
+
+    # Whether this widget's edit form should expose the per-panel color
+    # picker. Charts/meters override this to true; default false hides the
+    # picker for widgets that don't render a colored visualization
+    # (clock/text/iframe/image/list/table/comments/status_grid).
+    def self.supports_color_config?
+      false
+    end
+
+    # Whether this widget's edit form should expose the multi-color palette
+    # picker (array of hex). Multi-color charts (bar, pie, line) override
+    # to true; default false renders only the single-color picker (or none).
+    def self.supports_palette_config?
+      false
+    end
   end
 end

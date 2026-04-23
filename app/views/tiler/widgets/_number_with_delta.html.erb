@@ -18,8 +18,10 @@
            viewBox="0 0 <%= w %> <%= h %>"
            preserveAspectRatio="none"
            role="img"
-           aria-label="trend">
-        <polyline points="<%= points %>" fill="none" />
+           aria-label="trend"
+           <% if data[:color] %>style="stroke: <%= data[:color] %>;"<% end %>>
+        <polyline points="<%= points %>" fill="none"
+                  <% if data[:color] %>style="stroke: <%= data[:color] %>;"<% end %> />
       </svg>
     <% end %>
   </div>

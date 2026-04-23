@@ -33,7 +33,7 @@ module Tiler
 
       test "query returns exactly five keys" do
         data = panel_with(value_column: "value", aggregation: "last", max: 1000).data
-        assert_equal %i[value min max prefix suffix value_column].sort, data.keys.sort
+        assert_equal %i[value min max prefix suffix value_column color].sort, data.keys.sort
       end
 
       test "min defaults to 0 and follows config when set" do
@@ -94,7 +94,7 @@ module Tiler
         panel = create_panel(empty_dash, widget_type: "meter", data_source: empty,
                              config: { value_column: "value", aggregation: "last", max: 100 }.to_json)
         data = panel.data
-        assert_equal %i[value min max prefix suffix value_column].sort, data.keys.sort
+        assert_equal %i[value min max prefix suffix value_column color].sort, data.keys.sort
         assert_nil data[:value]
       end
 

@@ -69,6 +69,9 @@ module Tiler
         { "service" => "api", "count" => 142 }
       end
 
+      def self.supports_color_config?;   true; end
+      def self.supports_palette_config?; true; end
+
       def self.example_preview
         {
           "labels" => %w[api web worker cron db cdn],

@@ -3,10 +3,12 @@
   (function() {
     const ctx = document.getElementById("tiler-chart-<%= panel.id %>");
     if (!ctx || !window.Chart) return;
+    const baseOpts = { responsive: true, maintainAspectRatio: false };
+    const queryOpts = <%= raw (data[:options] || {}).to_json %>;
     new Chart(ctx, {
       type: "doughnut",
       data: { labels: <%= raw data[:labels].to_json %>, datasets: <%= raw data[:datasets].to_json %> },
-      options: { responsive: true, maintainAspectRatio: false }
+      options: Object.assign({}, baseOpts, queryOpts)
     });
   })();
 </script>

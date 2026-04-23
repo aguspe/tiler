@@ -20,7 +20,8 @@
      data-tiler--dashboard-grid-csrf-value="<%= form_authenticity_token %>"
      data-tiler--dashboard-grid-refresh-seconds-value="<%= @dashboard.refresh_seconds %>"
      data-tiler--dashboard-grid-disable-polling-value="<%= Tiler.configuration.disable_polling %>"
-     <% if @dashboard.background_color %>style="--paper: <%= @dashboard.background_color %>; background: <%= @dashboard.background_color %>;"<% end %>>
+     <% style = @dashboard.theme_inline_style %>
+     <% if style.present? %>style="<%= style %>"<% end %>>
   <%= turbo_stream_from @dashboard %>
   <% unless @tv_mode %>
     <div class="tiler-page-header">

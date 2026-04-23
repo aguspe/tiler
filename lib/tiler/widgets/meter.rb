@@ -24,7 +24,8 @@ module Tiler
           max:          max,
           prefix:       prefix,
           suffix:       suffix,
-          value_column: col
+          value_column: col,
+          color:        sanitize_color(config["color"])
         }
       end
 
@@ -62,7 +63,12 @@ module Tiler
       end
 
       def self.example_preview
-        { "value" => 64, "min" => 0, "max" => 100, "prefix" => nil, "suffix" => "%" }
+        { "value" => 64, "min" => 0, "max" => 100, "prefix" => nil, "suffix" => "%",
+          "color" => nil }
+      end
+
+      def self.supports_color_config?
+        true
       end
     end
   end
