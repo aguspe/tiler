@@ -40,6 +40,11 @@ module Tiler
       self.query_class = PieChartQuery
       self.default_config = { "aggregation" => "count" }
       self.default_size   = { w: 4, h: 3 }
+
+      def empty?(data)
+        data.nil? || data[:labels].blank? || data[:datasets].blank? ||
+          data[:datasets].all? { |ds| Array(ds[:data]).all? { |v| v.nil? || v.zero? } }
+      end
     end
   end
 end

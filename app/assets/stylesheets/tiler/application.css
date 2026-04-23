@@ -112,6 +112,10 @@ turbo-cable-stream-source { display: none !important; }
 
 .tiler-tag { background: var(--paper-3); color: var(--ink-2); font-family: var(--font-mono); font-size: 11px; font-weight: var(--fw-medium); padding: 2px 8px; border-radius: var(--radius-sm); }
 
+.tiler-panel-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; height: 100%; padding: 1rem; text-align: center; }
+.tiler-panel-empty p { margin: 0; }
+.tiler-btn-sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
+
 .tiler-skeleton { background: var(--paper-2); padding: 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); animation: tiler-pulse 1.5s ease-in-out infinite; height: 100%; }
 .tiler-skeleton-title { height: 1rem; background: var(--border); border-radius: var(--radius-sm); width: 40%; margin-bottom: 1rem; }
 .tiler-skeleton-body { height: 8rem; background: var(--paper-3); border-radius: var(--radius-sm); }

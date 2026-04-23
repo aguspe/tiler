@@ -14,10 +14,19 @@
       </div>
     </div>
     <div class="tiler-panel-body">
-      <% if data.nil? %>
-        <p class="tiler-muted">No data source configured.</p>
+      <% widget = panel.widget %>
+      <% if data.nil? || widget.empty?(data) %>
+        <div class="tiler-panel-empty">
+          <p class="tiler-muted">No data yet. Configure this panel to get started.</p>
+          <% if panel.data_source.nil? %>
+            <p class="tiler-muted tiler-text-sm">Tip: this widget needs a data source. Open Edit and pick one.</p>
+          <% end %>
+          <%= link_to "Edit panel", edit_dashboard_panel_path(panel.dashboard, panel),
+                class: "tiler-btn tiler-btn-sm",
+                data: { turbo_frame: "_top" } %>
+        </div>
       <% else %>
-        <%= render partial: panel.widget.partial, locals: { panel: panel, data: data } %>
+        <%= render partial: widget.partial, locals: { panel: panel, data: data } %>
       <% end %>
     </div>
   </div>

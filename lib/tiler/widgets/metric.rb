@@ -25,6 +25,10 @@ module Tiler
       self.query_class = MetricQuery
       self.default_config = { "aggregation" => "count" }
       self.default_size   = { w: 3, h: 2 }
+
+      def empty?(data)
+        data.nil? || panel.data_source.nil?
+      end
     end
   end
 end

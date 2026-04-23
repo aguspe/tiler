@@ -31,5 +31,13 @@ module Tiler
     def query_class
       self.class.query_class
     end
+
+    # Override in subclasses that have a meaningful empty state. The panel
+    # partial uses this to render a friendly "configure your panel" message
+    # instead of a blank widget body. Default: never empty (config-only
+    # widgets like clock / text / image render their own placeholders).
+    def empty?(data)
+      false
+    end
   end
 end
