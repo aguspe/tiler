@@ -8,7 +8,9 @@
       <h3><%= panel.title %></h3>
       <div class="tiler-panel-actions">
         <span class="tiler-tag"><%= panel.widget_label %></span>
-        <%= link_to "Edit", edit_dashboard_panel_path(panel.dashboard, panel), class: "tiler-link" %>
+        <%= link_to "Edit", edit_dashboard_panel_path(panel.dashboard, panel),
+              class: "tiler-link",
+              data: { turbo_frame: "_top" } %>
       </div>
     </div>
     <div class="tiler-panel-body">

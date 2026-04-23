@@ -35,10 +35,9 @@ export default class extends Controller {
       column: 12,
       cellHeight: 90,
       margin: 0,
-      staticGrid: true,
+      staticGrid: false,
       float: true,
-      // Whole tile is the drag handle in edit mode — header alone is too small to grab.
-      // .tiler-panel-body is excluded via CSS pointer-events on form inputs / editable elements.
+      // Whole tile is the drag handle — drag works always (no edit mode toggle).
       handle: ".grid-stack-item-content",
       acceptWidgets: true
     }, this.gridTarget)
@@ -50,7 +49,9 @@ export default class extends Controller {
       })
     }
 
-    this.editing = false
+    // Always-editable: panels carry the editing visual cue from the start.
+    this.gridTarget.classList.add("tiler-editing")
+    this.paletteOpen = false
     this._onChange = (_event, items) => this.persistLayout(items)
     this._onDropped = (_event, _previousNode, newNode) => this.handleDrop(newNode)
     this.grid.on("change", this._onChange)
@@ -80,24 +81,18 @@ export default class extends Controller {
     }
   }
 
-  toggle(event) {
+  // Toggle the widget palette open/closed. Replaces the prior Edit Layout
+  // toggle — drag-and-drop is always live; the only thing the button gates
+  // is showing the palette of widget types you can drop onto the grid.
+  togglePalette(event) {
     if (event && typeof event.preventDefault === "function") event.preventDefault()
-    this.setEditing(!this.editing)
-  }
-
-  setEditing(on) {
-    this.editing = on
-    if (!this.grid) return
-    this.grid.setStatic(!on)
-    this.grid.enableMove(on)
-    this.grid.enableResize(on)
-    if (this.hasGridTarget) this.gridTarget.classList.toggle("tiler-editing", on)
+    this.paletteOpen = !this.paletteOpen
     if (this.hasShellTarget) {
-      this.shellTarget.classList.toggle("tiler-editing-mode", on)
+      this.shellTarget.classList.toggle("tiler-editing-mode", this.paletteOpen)
     }
     if (this.hasToggleTarget) {
-      this.toggleTarget.textContent = on ? "Done Editing" : "Edit Layout"
-      this.toggleTarget.classList.toggle("tiler-btn-primary", on)
+      this.toggleTarget.textContent = this.paletteOpen ? "Close Palette" : "Add Panel"
+      this.toggleTarget.setAttribute("aria-expanded", this.paletteOpen ? "true" : "false")
     }
   }
 

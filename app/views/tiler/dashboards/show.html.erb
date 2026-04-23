@@ -17,12 +17,10 @@
     </div>
     <div>
       <button type="button"
-              class="tiler-btn"
-              data-tiler-toggle-edit
+              class="tiler-btn tiler-btn-primary"
+              data-tiler-add-panel
               data-tiler--dashboard-grid-target="toggle"
-              data-action="click->tiler--dashboard-grid#toggle">Edit Layout</button>
-      <%= link_to "Add Panel", new_dashboard_panel_path(@dashboard), class: "tiler-btn" %>
-      <%= link_to "Edit", edit_dashboard_path(@dashboard), class: "tiler-btn" %>
+              data-action="click->tiler--dashboard-grid#togglePalette">Add Panel</button>
     </div>
   </div>
 

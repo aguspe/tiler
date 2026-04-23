@@ -19,34 +19,33 @@ module Tiler
       visit dashboard_path(@dash.slug)
       assert_text "Sys Demo"
       assert_selector "turbo-frame#tiler_panel_#{@metric.id}", wait: 10
-      # Eager panel load (cavekit dashboard-layout R6) replaces the prior force-reload workaround.
       assert_text "Count", wait: 10
       assert_text "5",     wait: 10
       assert_selector ".tiler-clock", wait: 10
     end
 
-    test "edit layout toggle enables gridstack edit mode" do
+    test "gridstack initializes non-static (drag enabled from page load)" do
       visit dashboard_path(@dash.slug)
       assert_selector ".grid-stack", wait: 5
-      click_button "Edit Layout"
-      assert_text "Done Editing"
-      assert_selector ".tiler-editing", wait: 5
-      # Gridstack removes the static class and enables move when edit mode is on.
-      assert_no_selector ".grid-stack.grid-stack-static"
+      static = page.evaluate_script("document.querySelector('.grid-stack').gridstack.opts.staticGrid")
+      assert_equal false, static
+      assert_selector ".grid-stack.tiler-editing", wait: 5
+    end
+
+    test "Add Panel button toggles palette open/closed" do
+      visit dashboard_path(@dash.slug)
+      assert_selector "[data-tiler-palette]", visible: :hidden, wait: 5
+      click_button "Add Panel"
+      assert_selector "[data-tiler-palette]", visible: true, wait: 5
+      click_button "Close Palette"
+      assert_selector "[data-tiler-palette]", visible: :hidden, wait: 5
     end
 
     test "drag-drop: moving a panel PATCHes layout and persists x/y" do
       visit dashboard_path(@dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{@metric.id}", wait: 5
 
-      # Enter edit mode so drag/resize are enabled.
-      click_button "Edit Layout"
-      assert_text "Done Editing"
-
-      # Simulate a gridstack move via its JS API — headless Chrome can't do pixel-perfect
-      # drag-and-drop on gridstack reliably, so we drive the API the real UI ultimately calls.
-      # The `change` event fires, which triggers our PATCH /layout fetch.
-      # Move metric to a non-colliding slot below the clock (clock is at y=0, h=2).
+      # Drag works without any prior click — gridstack is non-static from boot.
       page.execute_script(<<~JS, @metric.id)
         const id = arguments[0];
         const grid = document.querySelector('.grid-stack').gridstack;
@@ -66,7 +65,6 @@ module Tiler
     test "drag-drop: resize-only fires PATCH" do
       visit dashboard_path(@dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{@clock.id}", wait: 5
-      click_button "Edit Layout"
 
       page.execute_script(<<~JS, @clock.id)
         const id = arguments[0];
@@ -81,7 +79,6 @@ module Tiler
     test "drag-drop: move then undo restores position" do
       visit dashboard_path(@dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{@metric.id}", wait: 5
-      click_button "Edit Layout"
 
       original = { x: @metric.x, y: @metric.y, w: @metric.width, h: @metric.height }
 
@@ -106,7 +103,6 @@ module Tiler
     test "drag-drop: two panels moved simultaneously both persist" do
       visit dashboard_path(@dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{@metric.id}", wait: 5
-      click_button "Edit Layout"
 
       page.execute_script(<<~JS, @metric.id, @clock.id)
         const [mid, cid] = [arguments[0], arguments[1]];
@@ -121,6 +117,19 @@ module Tiler
       wait_for_panel_persisted(@clock,  x: 8, y: 6, w: 4, h: 2)
     end
 
+    test "panel Edit link breaks out of the turbo-frame and navigates to edit form" do
+      visit dashboard_path(@dash.slug)
+      assert_selector "turbo-frame#tiler_panel_#{@metric.id}", wait: 10
+      # Eager panel load means the panel preview (with Edit link) is already in the DOM.
+      assert_selector "turbo-frame#tiler_panel_#{@metric.id} a", text: "Edit", wait: 10
+      within("turbo-frame#tiler_panel_#{@metric.id}") { click_link "Edit" }
+
+      # Should land on the panel edit page, not "Content missing" inside the frame.
+      assert_no_text "Content missing"
+      assert_text "Title", wait: 5
+      assert_text "Widget type", wait: 5
+    end
+
     private
 
     def wait_for_panel_persisted(panel, x:, y:, w:, h:, timeout: 5)
@@ -131,18 +140,6 @@ module Tiler
         raise "Layout never persisted (got x=#{panel.x} y=#{panel.y} w=#{panel.width} h=#{panel.height})" if Time.now > deadline
         sleep 0.1
       end
-    end
-
-    test "can add a new panel via UI" do
-      visit dashboard_path(@dash.slug)
-      click_link "Add Panel"
-      fill_in "Title", with: "New Metric"
-      select "Single Metric", from: "Widget type"
-      fill_in "Config (JSON)", with: { aggregation: "count" }.to_json
-      click_button "Create Panel"
-      assert_text "Panel added", wait: 5
-      # Eager panel load (cavekit dashboard-layout R6) replaces the prior force-reload workaround.
-      assert_selector "turbo-frame", text: "New Metric", wait: 10
     end
   end
 end

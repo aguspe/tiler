@@ -18,7 +18,7 @@ module Tiler
     Tiler.widgets.types.each do |widget_type|
       define_method "test_drop_#{widget_type}_creates_panel_and_renders_preview" do
         visit dashboard_path(@dash.slug)
-        click_button "Edit Layout"
+        click_button "Add Panel"
         assert_selector "[data-tiler-palette-widget][data-widget-type='#{widget_type}']", wait: 5
 
         starting_count = @dash.panels.count

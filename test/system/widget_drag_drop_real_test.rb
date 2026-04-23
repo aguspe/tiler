@@ -1,9 +1,8 @@
 require "application_system_test_case"
 
 # Tests the FULL real-browser drag-drop UX (mouse events through Selenium
-# ActionChains) — NOT the gridstack JS API. Companion to dashboard_flow_test.rb
-# which exercises gridstack programmatically. These tests catch real-UX
-# breakage that the JS-API-driven tests miss.
+# ActionChains and native MouseEvent dispatch) — NOT the gridstack JS API.
+# Companion to dashboard_flow_test.rb which exercises gridstack programmatically.
 module Tiler
   class WidgetDragDropRealTest < ApplicationSystemTestCase
     include Engine.routes.url_helpers
@@ -19,43 +18,29 @@ module Tiler
                    config: { text: "neighbor" }.to_json)
     end
 
-    test "Edit Layout button toggles gridstack out of static mode" do
+    test "gridstack initializes non-static so drag is enabled from page load" do
       visit dashboard_path(@dash.slug)
-      assert_selector "[data-tiler-toggle-edit]", wait: 5
-
-      static_before = page.evaluate_script("document.querySelector('.grid-stack').gridstack.opts.staticGrid")
-      assert_equal true, static_before
-
-      click_button "Edit Layout"
-
-      static_after = page.evaluate_script("document.querySelector('.grid-stack').gridstack.opts.staticGrid")
-      refute static_after, "expected gridstack to leave static mode after Edit Layout click"
-      assert_selector ".grid-stack.tiler-editing", wait: 2
-      assert_selector ".tiler-dashboard-shell.tiler-editing-mode", wait: 2
+      assert_selector ".grid-stack", wait: 5
+      static = page.evaluate_script("document.querySelector('.grid-stack').gridstack.opts.staticGrid")
+      assert_equal false, static, "gridstack should NOT be static — drag should work without any prior click"
+      assert_selector ".grid-stack.tiler-editing", wait: 5
     end
 
-    test "panel header is the drag handle and rendered after turbo-frame loads" do
+    test "panel header is rendered and panel surface is the drag handle" do
       visit dashboard_path(@dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{@panel.id}", wait: 5
-      # With eager_panel_load = true in test env, panel-header should be in DOM right away.
       assert_selector ".grid-stack-item[gs-id='#{@panel.id}'] .tiler-panel-header", wait: 5
+      handle = page.evaluate_script("document.querySelector('.grid-stack').gridstack.opts.handle")
+      assert_equal ".grid-stack-item-content", handle
     end
 
-    test "drag panel by pixel via mouse events: gridstack moves + persists" do
-      # KNOWN LIMITATION: Selenium ActionChains synthesizes mouse events that
-      # don't reliably trigger HTML5 drag handlers in headless Chrome. This is
-      # NOT a Tiler/gridstack bug — real Chrome works fine. We verify via a
-      # native MouseEvent dispatch (closer to a real browser's behavior) which
-      # DOES fire gridstack's handlers.
+    test "drag panel by pixel via native MouseEvents: gridstack moves + persists" do
       visit dashboard_path(@dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{@panel.id}", wait: 5
-      click_button "Edit Layout"
-      assert_selector ".grid-stack.tiler-editing", wait: 2
 
       # Native MouseEvent sequence: mousedown on the drag handle, mousemove to
       # the target slot, mouseup. Gridstack v10's drag-drop module listens on
-      # these events directly. evaluate_script wraps in `function(){}` so the
-      # body must be a single expression — wrap in IIFE.
+      # these events directly.
       moved = page.evaluate_script(<<~JS, @panel.id)
         (function(id) {
           var item = document.querySelector(".grid-stack-item[gs-id='" + id + "']");
@@ -79,32 +64,16 @@ module Tiler
       JS
       assert moved
 
-      # Allow change event + fetch PATCH round-trip.
       sleep 1
       @panel.reload
-      # Either coords changed OR test mode + headless Chrome chrome-driver
-      # quirk left them unchanged. Be lenient: assert PATCH at minimum
-      # would have fired (gridstack triggered a change event).
-      # If real coord change occurred, prefer the strict assertion.
       changed = @panel.x != 0 || @panel.y != 0
       if changed
         assert true, "panel moved (x=#{@panel.x}, y=#{@panel.y})"
       else
         skip "Headless Chrome dispatch didn't propagate to gridstack drag handler. " \
-             "Native MouseEvent dispatch is the same code path real Chrome uses; " \
-             "this is a chromedriver quirk, not a Tiler bug. " \
-             "Companion JS-API drag test in dashboard_flow_test.rb covers the assertion."
+             "Real Chrome works; this is a chromedriver quirk. " \
+             "JS-API drag covered by dashboard_flow_test.rb."
       end
-    end
-
-    test "drag is disabled before clicking Edit Layout" do
-      visit dashboard_path(@dash.slug)
-      assert_selector "turbo-frame#tiler_panel_#{@panel.id}", wait: 5
-      # Verify gridstack is static (drag disabled at the engine level).
-      static = page.evaluate_script("document.querySelector('.grid-stack').gridstack.opts.staticGrid")
-      assert_equal true, static
-      # And the editing class is absent.
-      assert_no_selector ".grid-stack.tiler-editing"
     end
   end
 end

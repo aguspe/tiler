@@ -64,7 +64,7 @@ module Tiler
 
     test "two palette drops in sequence both persist with distinct ids" do
       visit dashboard_path(@dash.slug)
-      click_button "Edit Layout"
+      click_button "Add Panel"
       assert_selector "[data-tiler-palette-widget]", wait: 5
       starting_count = @dash.panels.count
 
@@ -81,7 +81,7 @@ module Tiler
 
     test "drop-then-move: dropped panel can be moved and PATCH layout persists new coords" do
       visit dashboard_path(@dash.slug)
-      click_button "Edit Layout"
+      click_button "Add Panel"
       assert_selector "[data-tiler-palette-widget]", wait: 5
 
       drop_widget("text", x: 0, y: 4, hydrate: true)

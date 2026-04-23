@@ -16,7 +16,7 @@ module Tiler
     test "drop outside grid creates no panel" do
       starting_count = @dash.panels.count
       visit dashboard_path(@dash.slug)
-      click_button "Edit Layout"
+      click_button "Add Panel"
       assert_selector "[data-tiler-palette-widget]", wait: 5
 
       # Simulate a cancelled drag: gridstack's `dropped` event only fires when the helper
@@ -41,13 +41,13 @@ module Tiler
     test "starting a drag and not dropping does not POST to panels#create" do
       starting_count = @dash.panels.count
       visit dashboard_path(@dash.slug)
-      click_button "Edit Layout"
+      click_button "Add Panel"
       assert_selector "[data-tiler-palette-widget]", wait: 5
 
       # The dropped handler in show.html.erb only POSTs when grid.on('dropped') fires.
       # If we never trigger gridstack's drop event, no fetch is issued.
       # Verify by checking the dashboard panel count is unchanged after edit-mode toggle off.
-      click_button "Done Editing"
+      click_button "Close Palette"
       sleep 0.3
 
       @dash.reload
