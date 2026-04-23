@@ -73,3 +73,145 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/test/dummy/tmp/capybara
           if-no-files-found: ignore
+
+  examples-selenium-rspec:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby-3.4.1
+          bundler-cache: true
+
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Boot Tiler dummy app + seed
+        env:
+          RAILS_ENV: development
+        run: |
+          cd test/dummy
+          bundle exec rails db:drop db:create db:schema:load
+          bundle exec rails tiler:seed
+          bundle exec rails server -p 3131 -b 127.0.0.1 -d
+          for i in {1..30}; do
+            curl -sf http://127.0.0.1:3131/tiler/dashboards/demo > /dev/null && break
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:3131/tiler/dashboards/demo > /dev/null
+
+      - name: Install example deps
+        working-directory: examples/selenium-ruby-rspec
+        run: bundle install
+
+      - name: Run example suite
+        working-directory: examples/selenium-ruby-rspec
+        env:
+          TILER_BASE_URL: http://127.0.0.1:3131
+          TILER_DASHBOARD_SLUG: demo
+        run: bundle exec rspec
+
+  examples-cypress:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby-3.4.1
+          bundler-cache: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Boot Tiler dummy app + seed
+        env:
+          RAILS_ENV: development
+        run: |
+          cd test/dummy
+          bundle exec rails db:drop db:create db:schema:load
+          bundle exec rails tiler:seed
+          bundle exec rails server -p 3131 -b 127.0.0.1 -d
+          for i in {1..30}; do
+            curl -sf http://127.0.0.1:3131/tiler/dashboards/demo > /dev/null && break
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:3131/tiler/dashboards/demo > /dev/null
+
+      - name: Install example deps
+        working-directory: examples/cypress
+        run: npm install
+
+      - name: Run example suite
+        working-directory: examples/cypress
+        env:
+          CYPRESS_BASE_URL: http://127.0.0.1:3131
+          CYPRESS_DASHBOARD_SLUG: demo
+        run: npx cypress run
+
+      - name: Upload Cypress screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: examples/cypress/cypress/screenshots
+          if-no-files-found: ignore
+
+  examples-playwright:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby-3.4.1
+          bundler-cache: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Boot Tiler dummy app + seed
+        env:
+          RAILS_ENV: development
+        run: |
+          cd test/dummy
+          bundle exec rails db:drop db:create db:schema:load
+          bundle exec rails tiler:seed
+          bundle exec rails server -p 3131 -b 127.0.0.1 -d
+          for i in {1..30}; do
+            curl -sf http://127.0.0.1:3131/tiler/dashboards/demo > /dev/null && break
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:3131/tiler/dashboards/demo > /dev/null
+
+      - name: Install example deps
+        working-directory: examples/playwright
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Run example suite
+        working-directory: examples/playwright
+        env:
+          BASE_URL: http://127.0.0.1:3131
+          DASHBOARD_SLUG: demo
+        run: npx playwright test
+
+      - name: Upload Playwright traces on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: examples/playwright/test-results
+          if-no-files-found: ignore
