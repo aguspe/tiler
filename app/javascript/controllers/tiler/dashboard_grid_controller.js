@@ -42,8 +42,17 @@ export default class extends Controller {
       float: true,
       // Whole tile is the drag handle — drag works always (no edit mode toggle).
       handle: ".grid-stack-item-content",
-      acceptWidgets: true
+      acceptWidgets: true,
+      // Enable resize from every edge + corner (default is south-east only).
+      // Hover near a side or corner to grow/shrink the tile.
+      resizable: { handles: "n,e,s,w,ne,se,sw,nw" }
     }, this.gridTarget)
+
+    // Responsive: under 720px, collapse to 1 column so tiles stack instead of
+    // becoming pixel-thin. Re-applies on resize.
+    this._applyResponsiveColumns()
+    this._onResize = () => this._applyResponsiveColumns()
+    window.addEventListener("resize", this._onResize)
 
     if (typeof window.GridStack.setupDragIn === "function") {
       window.GridStack.setupDragIn(".tiler-widget-palette-item", {
@@ -56,17 +65,20 @@ export default class extends Controller {
     // that produced a 'whole dashboard is selected' visual. Drag affordance
     // lives in cursor + subtle outline-on-hover (CSS).
     this.paletteOpen = false
-    this._onChange = (event, items) => {
-      this.persistLayout(items)
-      // Compact AFTER user moves so freed slots get filled. Skip the very
-      // first synthetic 'change' that gridstack fires during init (items === undefined).
-      if (items && items.length && typeof this.grid.compact === "function") {
-        this.grid.compact()
-      }
+    // Persist on every change (move OR resize). We deliberately do NOT call
+    // grid.compact() here: compacting on resize-change rebuilds sibling tiles'
+    // resize handles in a way that intermittently broke their bindings (the
+    // user could resize one tile, then a second tile would silently ignore
+    // resize attempts). Compact only runs after `dragstop` (move freed a row)
+    // or after a palette drop / panel delete (handleDrop).
+    this._onChange   = (_event, items) => this.persistLayout(items)
+    this._onDragStop = () => {
+      if (typeof this.grid.compact === "function") this.grid.compact()
     }
-    this._onDropped = (_event, _previousNode, newNode) => this.handleDrop(newNode)
-    this.grid.on("change", this._onChange)
-    this.grid.on("dropped", this._onDropped)
+    this._onDropped  = (_event, _previousNode, newNode) => this.handleDrop(newNode)
+    this.grid.on("change",   this._onChange)
+    this.grid.on("dragstop", this._onDragStop)
+    this.grid.on("dropped",  this._onDropped)
 
     if (this.refreshSecondsValue > 0 && !this.disablePollingValue) {
       this.refreshInterval = setInterval(() => {
@@ -86,9 +98,24 @@ export default class extends Controller {
       clearInterval(this.refreshInterval)
       this.refreshInterval = null
     }
+    if (this._onResize) {
+      window.removeEventListener("resize", this._onResize)
+      this._onResize = null
+    }
     if (this.grid) {
       try { this.grid.off("change", this._onChange) } catch (_e) { /* noop */ }
       try { this.grid.off("dropped", this._onDropped) } catch (_e) { /* noop */ }
+    }
+  }
+
+  _applyResponsiveColumns() {
+    if (!this.grid || typeof this.grid.column !== "function") return
+    const targetCols = window.innerWidth <= 720 ? 1 : 12
+    if (this._appliedColumns === targetCols) return
+    this._appliedColumns = targetCols
+    // 'list' layout stacks each tile full-width when the column count drops.
+    try { this.grid.column(targetCols, "list") } catch (_e) {
+      try { this.grid.column(targetCols) } catch (_e2) { /* noop */ }
     }
   }
 

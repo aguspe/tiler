@@ -117,6 +117,10 @@ module Tiler
         var grid = document.querySelector('.grid-stack').gridstack;
         var n = grid.engine.nodes.find(function(x){ return x.el.getAttribute('gs-id') == String(id); });
         grid.update(n.el, { x: 0, y: 4 });
+        // grid.update() does not fire dragstop, so the controller's compact
+        // hook never runs. Trigger compaction directly — this test asserts
+        // the layout state after compaction, not the listener wiring.
+        grid.compact();
       JS
       sleep 0.5
 

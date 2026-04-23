@@ -56,15 +56,17 @@ module Tiler
       assert_text(/configure/i)
     end
 
-    test "the empty-state has an Edit link that breaks out of the turbo-frame" do
+    test "the empty-state has a Configure button that opens the slide-over drawer" do
       panel = create_panel(@dash, title: "Empty Bar 2", widget_type: "bar_chart",
                           data_source: @empty_source,
                           x: 0, y: 0, width: 6, height: 3,
                           config: { aggregation: "count" }.to_json)
       visit dashboard_path(@dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{panel.id}", wait: 5
-      link = find(".tiler-panel-empty a", text: /edit/i, wait: 5)
-      assert_equal "_top", link["data-turbo-frame"]
+      btn = find(".tiler-panel-empty button", text: /configure/i, wait: 5)
+      assert_includes btn["data-tiler--drawer-url-param"],
+                      "/panels/#{panel.id}/edit"
+      assert_includes btn["data-action"], "tiler--drawer#openWith"
     end
 
     test "chart widget WITH data does not show the empty state" do

@@ -1,5 +1,18 @@
 <% content_for :title, @dashboard.name %>
 
+<div data-controller="tiler--drawer"
+     data-tiler--drawer-frame-id-value="tiler_panel_edit_drawer">
+  <div class="tiler-drawer-backdrop"
+       data-tiler--drawer-target="backdrop"
+       data-action="click->tiler--drawer#close"></div>
+  <aside class="tiler-drawer"
+         role="dialog"
+         aria-label="Edit Panel"
+         data-tiler-drawer
+         data-tiler--drawer-target="panel">
+    <%= turbo_frame_tag "tiler_panel_edit_drawer", class: "tiler-drawer-frame" %>
+  </aside>
+
 <div class="tiler-dashboard"
      data-controller="tiler--dashboard-grid"
      data-tiler--dashboard-grid-layout-url-value="<%= layout_dashboard_path(@dashboard) %>"
@@ -32,11 +45,11 @@
     <p><strong>Tiler</strong> is a plug-and-play dashboards engine for Rails. Each tile is a <strong>widget</strong> that pulls from a <strong>data source</strong>.</p>
     <p>To populate a widget you can either:</p>
     <ul class="tiler-about-list">
-      <li>Push records via the data source's webhook — open any panel's Edit page → <em>How do I push data</em> for a one-line curl.</li>
+      <li>Push records via the data source's webhook — click any tile's header → <em>How do I push data</em> for a one-line curl.</li>
       <li>Paste a static JSON config to preview a widget instantly without a data source.</li>
     </ul>
     <p class="tiler-muted">
-      <strong>Drag</strong> a tile to move it. <strong>Resize</strong> from the bottom-right corner. Click <strong>Add Panel</strong> to drop in new widgets from the palette. <strong>Edit</strong> each tile from its <em>Edit</em> link.
+      <strong>Drag</strong> a tile to move it. <strong>Resize</strong> by dragging any edge or corner — every tile snaps to the 12-column grid (min 1, max 12 across or down). Click <strong>Add Panel</strong> to drop in new widgets from the palette. <strong>Click</strong> a tile's header to edit it.
     </p>
   </details>
   <% end %>
@@ -85,12 +98,23 @@
              data-tiler-refresh="<%= @dashboard.refresh_seconds %>"
            <% end %>>
         <% panels.each do |panel| %>
+          <% pwk    = Tiler.widgets[panel.widget_type] %>
+          <% pmin   = (pwk&.min_size || { w: 1, h: 1 }) %>
+          <% pmax   = (pwk&.max_size || { w: 12, h: 12 }) %>
+          <% pminw  = pmin[:w] || pmin["w"] || 1 %>
+          <% pminh  = pmin[:h] || pmin["h"] || 1 %>
+          <% pmaxw  = pmax[:w] || pmax["w"] || 12 %>
+          <% pmaxh  = pmax[:h] || pmax["h"] || 12 %>
           <div class="grid-stack-item"
                gs-id="<%= panel.id %>"
                gs-x="<%= panel.x %>"
                gs-y="<%= panel.y %>"
                gs-w="<%= panel.width %>"
-               gs-h="<%= panel.height %>">
+               gs-h="<%= panel.height %>"
+               gs-min-w="<%= pminw %>"
+               gs-min-h="<%= pminh %>"
+               gs-max-w="<%= pmaxw %>"
+               gs-max-h="<%= pmaxh %>">
             <div class="grid-stack-item-content">
               <%= turbo_frame_tag "tiler_panel_#{panel.id}",
                     src: preview_dashboard_panel_path(@dashboard, panel),
@@ -106,4 +130,5 @@
       </div>
     </div>
   <% end %>
+</div>
 </div>

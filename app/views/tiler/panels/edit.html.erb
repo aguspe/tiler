@@ -1,5 +1,14 @@
 <% content_for :title, "Edit Panel" %>
-<%= link_to "← Back to dashboard", dashboard_path(@dashboard.slug),
-      class: "tiler-link", data: { tiler_back: "" } %>
-<h1>Edit Panel</h1>
-<%= render "form", panel: @panel %>
+<%= turbo_frame_tag "tiler_panel_edit_drawer", class: "tiler-drawer-frame" do %>
+  <header class="tiler-drawer-header">
+    <h2>Edit Panel</h2>
+    <%= link_to dashboard_path(@dashboard.slug),
+          class: "tiler-drawer-close",
+          aria: { label: "Close edit drawer" },
+          data: { tiler_drawer_close: "", tiler_back: "",
+                  action: "click->tiler--drawer#close" } do %>×<% end %>
+  </header>
+  <div class="tiler-drawer-body">
+    <%= render "form", panel: @panel %>
+  </div>
+<% end %>

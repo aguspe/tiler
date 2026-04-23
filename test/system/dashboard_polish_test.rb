@@ -23,11 +23,12 @@ module Tiler
       assert_selector ".tiler-form .tiler-form-actions", wait: 5
     end
 
-    test "edit page has a Back link to the dashboard" do
+    test "edit page has a link back to the dashboard" do
       visit edit_dashboard_panel_path(@dash, @panel)
       back = find("[data-tiler-back]", wait: 5)
-      assert_match(/back/i, back.text)
       assert_includes back["href"], dashboard_path(@dash.slug)
+      label = back["aria-label"] || back.text
+      assert_match(/close|back|dashboard/i, label)
     end
 
     test "delete button opens a custom modal (not a native confirm)" do

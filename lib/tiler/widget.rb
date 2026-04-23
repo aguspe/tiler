@@ -1,12 +1,18 @@
 module Tiler
   class Widget
     class << self
-      attr_accessor :type, :partial, :label, :query_class, :col_spans, :default_config, :default_size
+      attr_accessor :type, :partial, :label, :query_class, :col_spans,
+                    :default_config, :default_size, :min_size, :max_size
     end
 
     self.col_spans      = [ 1, 2 ]
     self.default_config = {}
     self.default_size   = { w: 6, h: 2 }
+    # Resize bounds enforced by gridstack (gs-min-w/min-h/max-w/max-h).
+    # Sensible defaults — every tile must be at least 1x1 and at most the
+    # full 12-col width / a generous 12 rows tall. Subclasses override.
+    self.min_size       = { w: 1, h: 1 }
+    self.max_size       = { w: 12, h: 12 }
 
     attr_reader :panel, :config
 

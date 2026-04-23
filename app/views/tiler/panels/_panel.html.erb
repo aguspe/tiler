@@ -3,27 +3,30 @@
    # partial is safe to render in any context. %>
 <% data = local_assigns.key?(:data) ? local_assigns[:data] : panel.data %>
 <%= turbo_frame_tag "tiler_panel_#{panel.id}" do %>
+  <% edit_url = edit_dashboard_panel_path(panel.dashboard, panel) %>
   <div class="tiler-panel">
-    <div class="tiler-panel-header">
-      <h3><%= panel.title %></h3>
-      <div class="tiler-panel-actions">
-        <span class="tiler-tag"><%= panel.widget_label %></span>
-        <%= link_to "Edit", edit_dashboard_panel_path(panel.dashboard, panel),
-              class: "tiler-link",
-              data: { turbo_frame: "_top" } %>
-      </div>
+    <div class="tiler-panel-header tiler-panel-header-clickable"
+         data-tiler-panel-header
+         data-action="click->tiler--drawer#openWith keydown.enter->tiler--drawer#openWith"
+         data-tiler--drawer-url-param="<%= edit_url %>"
+         tabindex="0"
+         role="button"
+         title="Click to edit"
+         aria-label="Edit <%= panel.title %>">
+      <h3 class="tiler-panel-title" data-tiler-panel-title><%= panel.title %></h3>
     </div>
     <div class="tiler-panel-body">
       <% widget = panel.widget %>
       <% if data.nil? || widget.empty?(data) %>
         <div class="tiler-panel-empty">
-          <p class="tiler-muted">No data yet. Configure this panel to get started.</p>
+          <p class="tiler-muted">No data yet. Click the header to configure this panel.</p>
           <% if panel.data_source.nil? %>
-            <p class="tiler-muted tiler-text-sm">Tip: this widget needs a data source. Open Edit and pick one.</p>
+            <p class="tiler-muted tiler-text-sm">Tip: this widget needs a data source — click the header to pick one.</p>
           <% end %>
-          <%= link_to "Edit panel", edit_dashboard_panel_path(panel.dashboard, panel),
-                class: "tiler-btn tiler-btn-sm",
-                data: { turbo_frame: "_top" } %>
+          <button type="button"
+                  class="tiler-btn tiler-btn-sm"
+                  data-action="click->tiler--drawer#openWith"
+                  data-tiler--drawer-url-param="<%= edit_url %>">Configure</button>
         </div>
       <% else %>
         <%= render partial: widget.partial, locals: { panel: panel, data: data } %>

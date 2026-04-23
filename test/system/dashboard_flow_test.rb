@@ -120,17 +120,18 @@ module Tiler
       assert_equal 4, @clock.width
     end
 
-    test "panel Edit link breaks out of the turbo-frame and navigates to edit form" do
+    test "double-clicking a panel title opens the edit drawer with the form" do
       visit dashboard_path(@dash.slug)
       assert_selector "turbo-frame#tiler_panel_#{@metric.id}", wait: 10
-      # Eager panel load means the panel preview (with Edit link) is already in the DOM.
-      assert_selector "turbo-frame#tiler_panel_#{@metric.id} a", text: "Edit", wait: 10
-      within("turbo-frame#tiler_panel_#{@metric.id}") { click_link "Edit" }
+      assert_selector "turbo-frame#tiler_panel_#{@metric.id} [data-tiler-panel-header]", wait: 10
+      find("turbo-frame#tiler_panel_#{@metric.id} [data-tiler-panel-header]").click
 
-      # Should land on the panel edit page, not "Content missing" inside the frame.
+      assert_selector "[data-tiler-drawer].is-open", visible: :all, wait: 5
       assert_no_text "Content missing"
-      assert_text "Title", wait: 5
-      assert_text "Widget type", wait: 5
+      within("[data-tiler-drawer]") do
+        assert_text "Title", wait: 5
+        assert_text "Widget type", wait: 5
+      end
     end
 
     private
