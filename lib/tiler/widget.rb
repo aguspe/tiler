@@ -16,6 +16,14 @@ module Tiler
     end
 
     def data
+      # Static-preview escape hatch: if config carries a `_preview` key, use
+      # that as the widget's data and skip the query entirely. Lets users
+      # paste arbitrary JSON into the Config field to preview a widget
+      # without wiring up a data source.
+      preview = config["_preview"]
+      if preview.present?
+        return preview.is_a?(Hash) ? preview.deep_symbolize_keys : preview
+      end
       return nil if query_class.nil?
       query_class.new(panel, config).call
     end
@@ -32,12 +40,17 @@ module Tiler
       self.class.query_class
     end
 
-    # Override in subclasses that have a meaningful empty state. The panel
-    # partial uses this to render a friendly "configure your panel" message
-    # instead of a blank widget body. Default: never empty (config-only
-    # widgets like clock / text / image render their own placeholders).
+    # Default rule for the global "configure your panel" empty state:
+    #   - Data-backed widget (query_class set) with no data source and no
+    #     preview data → empty.
+    #   - Config-only widgets (clock/text/iframe/image: query_class nil)
+    #     never trigger this — they render their own placeholders.
+    # Subclasses override for stricter checks (e.g. chart widgets look for
+    # empty datasets even when a data source IS attached).
     def empty?(data)
-      false
+      return false unless self.class.query_class
+      return false if config["_preview"].present?
+      panel.data_source.nil?
     end
 
     # An example config object for this widget. Shown verbatim on the panel

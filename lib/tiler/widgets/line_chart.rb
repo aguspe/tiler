@@ -64,6 +64,7 @@ module Tiler
       self.default_size   = { w: 6, h: 3 }
 
       def empty?(data)
+        return true if super
         data.nil? || data[:datasets].blank? ||
           data[:datasets].all? { |ds| Array(ds[:data]).all? { |v| v.nil? || v.zero? } }
       end

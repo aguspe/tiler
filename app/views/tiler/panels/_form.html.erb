@@ -67,7 +67,7 @@
     <summary>How do I push data into this widget?</summary>
     <% data_source = panel.data_source || (panel.tiler_data_source_id && Tiler::DataSource.find_by(id: panel.tiler_data_source_id)) %>
     <% if data_source.nil? %>
-      <p class="tiler-muted">No data source attached. Pick one above (or create one under Data Sources) to enable webhook ingestion.</p>
+      <p class="tiler-muted">No data source attached. Pick one above, or <%= link_to "manage Data Sources", data_sources_path, class: "tiler-link" %> to create one and enable webhook ingestion.</p>
     <% else %>
       <% endpoint_url = "#{request.protocol}#{request.host_with_port}/tiler/ingest/#{data_source.slug}" %>
       <p>Push records via HTTP POST to:</p>

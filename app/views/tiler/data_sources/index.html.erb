@@ -1,8 +1,21 @@
 <% content_for :title, "Data Sources" %>
 <div class="tiler-page-header">
   <h1>Data Sources</h1>
-  <%= link_to "New Data Source", new_data_source_path, class: "tiler-btn tiler-btn-primary" %>
+  <%= link_to "New Data Source", new_data_source_path, class: "tiler-btn tiler-btn-primary tiler-btn-sm" %>
 </div>
+
+<details class="tiler-about" data-tiler-about-data-sources open>
+  <summary>About data sources</summary>
+  <p><strong>Data sources</strong> are where Tiler stores the records each widget renders from. Each source has a <strong>schema</strong> (descriptive, not enforced) and a <strong>webhook token</strong> you can use to push records over HTTP.</p>
+  <p>To populate a source you can:</p>
+  <ul class="tiler-about-list">
+    <li>POST JSON records to <code>/tiler/ingest/&lt;source-slug&gt;</code> with the <code>X-Tiler-Token</code> header — see any source's detail page for a ready curl command.</li>
+    <li>Send single records (one JSON object) or batches (an array of objects).</li>
+    <li>Add reserved fields <code>recorded_at</code> (ISO-8601) and <code>source_ref</code> (correlation id) alongside your payload keys.</li>
+  </ul>
+  <p class="tiler-muted">Once records are flowing, point a panel at the source from any dashboard's Add Panel → Edit flow.</p>
+</details>
+
 <% if @data_sources.empty? %>
   <div class="tiler-empty"><p>No data sources yet.</p></div>
 <% else %>

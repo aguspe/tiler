@@ -26,10 +26,7 @@ module Tiler
       self.default_config = { "aggregation" => "count" }
       self.default_size   = { w: 3, h: 2 }
 
-      def empty?(data)
-        data.nil? || panel.data_source.nil?
-      end
-
+      # Defer to Tiler::Widget#empty? — empty when no data_source AND no preview.
       def self.example_config
         { "aggregation" => "avg", "value_column" => "duration", "time_window" => "24h" }
       end
