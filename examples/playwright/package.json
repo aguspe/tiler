@@ -1,0 +1,13 @@
+{
+  "name": "tiler-playwright-example",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Playwright e2e example for Tiler dashboards",
+  "scripts": {
+    "test": "playwright test",
+    "ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "tiler-cypress-example",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Cypress e2e example for Tiler dashboards",
+  "scripts": {
+    "test": "cypress run",
+    "open": "cypress open"
+  },
+  "devDependencies": {
+    "cypress": "^13.13.0"
+  }
+}

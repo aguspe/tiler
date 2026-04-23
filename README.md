@@ -105,6 +105,20 @@ All four are scoped under the `tiler_` table prefix to avoid colliding with host
 - **Custom layout** — set `config.layout` to render Tiler pages inside your app chrome.
 - **Multi-tenant** — override `Tiler::ApplicationController` in your host app to scope records by tenant.
 
+## Examples
+
+Working examples live under [`examples/`](./examples):
+
+| Example | Use it for |
+|---|---|
+| [`rails-host-app/`](./examples/rails-host-app) | Mounting Tiler in an existing Rails 7+ application — Gemfile, initializer, routes, custom-widget hook |
+| [`json-ingest/`](./examples/json-ingest) | Sending data into Tiler from any system that speaks HTTP+JSON — curl, Node, Python, Bash |
+| [`selenium-ruby-rspec/`](./examples/selenium-ruby-rspec) | E2E testing Tiler dashboards from a Ruby/RSpec suite |
+| [`cypress/`](./examples/cypress) | E2E testing Tiler dashboards from Cypress |
+| [`playwright/`](./examples/playwright) | E2E testing Tiler dashboards from Playwright |
+
+For a full testability analysis (stable selector inventory + per-framework scoring), see [`context/refs/tiler-e2e-testability.md`](./context/refs/tiler-e2e-testability.md).
+
 ## License
 
 MIT.
