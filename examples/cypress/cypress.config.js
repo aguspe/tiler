@@ -6,6 +6,7 @@ module.exports = defineConfig({
     env: {
       dashboardSlug: process.env.CYPRESS_DASHBOARD_SLUG || "demo",
     },
+    supportFile: false,
     defaultCommandTimeout: 10000,
     video: false,
     screenshotOnRunFailure: true,
