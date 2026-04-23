@@ -131,6 +131,27 @@ turbo-cable-stream-source { display: none !important; }
 .tiler-info p { margin: 0.5rem 0 0.25rem; color: var(--ink-2); font-size: 0.875rem; }
 .tiler-code-block { background: var(--paper-3); padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-2); white-space: pre-wrap; word-break: break-all; margin: 0.25rem 0 0.5rem; overflow-x: auto; }
 
+/* Confirmation modal — replaces native confirm() */
+.tiler-modal-overlay { position: fixed; inset: 0; background: rgba(14, 15, 20, 0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.tiler-modal { background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; max-width: 420px; width: 90%; box-shadow: var(--shadow-3); }
+.tiler-modal-title { margin: 0 0 1rem; font-family: var(--font-display); font-size: 1rem; font-weight: var(--fw-semi); color: var(--ink); }
+.tiler-modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+
+/* Page header layout — Add Panel sits under the title at small size */
+.tiler-page-header-actions { margin-top: 0.5rem; display: flex; gap: 0.5rem; }
+
+/* About info banner above the grid */
+.tiler-about { background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1rem; }
+.tiler-about > summary { cursor: pointer; font-weight: var(--fw-semi); color: var(--ink-2); }
+.tiler-about[open] > summary { margin-bottom: 0.5rem; }
+.tiler-about p { margin: 0.25rem 0; color: var(--ink-2); font-size: 0.875rem; line-height: 1.5; }
+
+/* Copy rows: code block + copy button on the same line */
+.tiler-copy-row { display: flex; align-items: stretch; gap: 0.5rem; margin: 0.25rem 0 0.5rem; }
+.tiler-copy-row .tiler-code-block { flex: 1; margin: 0; }
+.tiler-copy-row .tiler-btn { align-self: flex-start; }
+.tiler-btn-success { background: var(--success); color: var(--success-ink); border-color: var(--success); }
+
 /* Flash banner: include a close button */
 .tiler-flash { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .tiler-flash-message { flex: 1; }

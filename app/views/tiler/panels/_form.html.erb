@@ -43,10 +43,17 @@
   <div class="tiler-field">
     <%= f.label :config, "Config (JSON)" %>
     <%= f.text_area :config, rows: 8, placeholder: example_config %>
-    <div class="tiler-example-config-row">
+    <div class="tiler-example-config-row"
+         data-controller="tiler--clipboard"
+         data-tiler--clipboard-text-value="<%= example_config %>">
       <span class="tiler-hint">Example for <%= widget_klass.label %>:</span>
       <code data-tiler-example-config><%= example_config %></code>
+      <button type="button" class="tiler-btn tiler-btn-sm" data-tiler-copy
+              data-action="click->tiler--clipboard#copy">Copy</button>
     </div>
+    <p class="tiler-hint">
+      Tip: paste any static JSON here to <strong>preview</strong> the widget without a data source — useful for quickly trying different shapes.
+    </p>
   </div>
 
   <details class="tiler-info" data-tiler-info open>
@@ -55,28 +62,54 @@
     <% if data_source.nil? %>
       <p class="tiler-muted">No data source attached. Pick one above (or create one under Data Sources) to enable webhook ingestion.</p>
     <% else %>
+      <% endpoint_url = "#{request.protocol}#{request.host_with_port}/tiler/ingest/#{data_source.slug}" %>
       <p>Push records via HTTP POST to:</p>
-      <pre class="tiler-code-block"><%= request.protocol + request.host_with_port %>/tiler/ingest/<%= data_source.slug %></pre>
+      <div class="tiler-copy-row" data-controller="tiler--clipboard"
+           data-tiler--clipboard-text-value="<%= endpoint_url %>">
+        <pre class="tiler-code-block"><%= endpoint_url %></pre>
+        <button type="button" class="tiler-btn tiler-btn-sm" data-tiler-copy
+                data-action="click->tiler--clipboard#copy">Copy</button>
+      </div>
       <p>Header (treat as an API key):</p>
-      <pre class="tiler-code-block">X-Tiler-Token: <%= data_source.webhook_token %></pre>
+      <div class="tiler-copy-row" data-controller="tiler--clipboard"
+           data-tiler--clipboard-text-value="<%= data_source.webhook_token %>">
+        <pre class="tiler-code-block">X-Tiler-Token: <%= data_source.webhook_token %></pre>
+        <button type="button" class="tiler-btn tiler-btn-sm" data-tiler-copy
+                data-action="click->tiler--clipboard#copy">Copy</button>
+      </div>
       <p>Sample payload for the <strong><%= widget_klass.label %></strong> widget:</p>
-      <pre class="tiler-code-block"><%= JSON.pretty_generate(JSON.parse(example_payload)) %></pre>
+      <% payload_pretty = JSON.pretty_generate(JSON.parse(example_payload)) %>
+      <div class="tiler-copy-row" data-controller="tiler--clipboard"
+           data-tiler--clipboard-text-value="<%= payload_pretty %>">
+        <pre class="tiler-code-block"><%= payload_pretty %></pre>
+        <button type="button" class="tiler-btn tiler-btn-sm" data-tiler-copy
+                data-action="click->tiler--clipboard#copy">Copy</button>
+      </div>
+      <% curl_cmd = "curl -X POST #{endpoint_url} \\\n  -H \"X-Tiler-Token: #{data_source.webhook_token}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '#{example_payload}'" %>
       <p>Example curl:</p>
-      <pre class="tiler-code-block">curl -X POST <%= request.protocol + request.host_with_port %>/tiler/ingest/<%= data_source.slug %> \
-  -H "X-Tiler-Token: <%= data_source.webhook_token %>" \
-  -H "Content-Type: application/json" \
-  -d '<%= example_payload %>'</pre>
+      <div class="tiler-copy-row" data-controller="tiler--clipboard"
+           data-tiler--clipboard-text-value="<%= curl_cmd %>">
+        <pre class="tiler-code-block"><%= curl_cmd %></pre>
+        <button type="button" class="tiler-btn tiler-btn-sm" data-tiler-copy
+                data-action="click->tiler--clipboard#copy">Copy</button>
+      </div>
     <% end %>
   </details>
-<% end %>
 
-<div class="tiler-form-actions">
-  <button type="submit" form="tiler-panel-form" class="tiler-btn tiler-btn-primary">
-    <%= panel.persisted? ? "Update Panel" : "Create Panel" %>
-  </button>
-  <% if panel.persisted? %>
-    <%= button_to "Delete Panel", dashboard_panel_path(@dashboard, panel), method: :delete,
-                  class: "tiler-btn tiler-btn-danger",
-                  data: { turbo_confirm: "Remove panel?" } %>
-  <% end %>
-</div>
+  <div class="tiler-form-actions">
+    <button type="submit" class="tiler-btn tiler-btn-primary">
+      <%= panel.persisted? ? "Update Panel" : "Create Panel" %>
+    </button>
+    <% if panel.persisted? %>
+      <button type="button"
+              class="tiler-btn tiler-btn-danger"
+              data-tiler-delete
+              data-controller="tiler--modal"
+              data-action="click->tiler--modal#open"
+              data-tiler--modal-message-value="Remove this panel? This cannot be undone."
+              data-tiler--modal-confirm-label-value="Delete panel"
+              data-tiler--modal-action-value="<%= dashboard_panel_path(@dashboard, panel) %>"
+              data-tiler--modal-method-value="delete">Delete Panel</button>
+    <% end %>
+  </div>
+<% end %>

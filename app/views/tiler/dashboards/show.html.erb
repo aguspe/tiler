@@ -14,15 +14,21 @@
       <% if @dashboard.description.present? %>
         <p class="tiler-muted"><%= @dashboard.description %></p>
       <% end %>
-    </div>
-    <div>
-      <button type="button"
-              class="tiler-btn tiler-btn-primary"
-              data-tiler-add-panel
-              data-tiler--dashboard-grid-target="toggle"
-              data-action="click->tiler--dashboard-grid#togglePalette">Add Panel</button>
+      <div class="tiler-page-header-actions">
+        <button type="button"
+                class="tiler-btn tiler-btn-primary tiler-btn-sm"
+                data-tiler-add-panel
+                data-tiler--dashboard-grid-target="toggle"
+                data-action="click->tiler--dashboard-grid#togglePalette">Add Panel</button>
+      </div>
     </div>
   </div>
+
+  <details class="tiler-about" data-tiler-about open>
+    <summary>About this dashboard</summary>
+    <p>Tiler is a plug-and-play dashboards engine for Rails. Each tile is a <strong>widget</strong> that pulls from a <strong>data source</strong>. Push records via the data source's webhook (one-line curl, see any panel's Edit page → "How do I push data"), or paste a static JSON config to preview a widget.</p>
+    <p class="tiler-muted">Drag a tile to move it. Resize from the bottom-right corner. Click <strong>Add Panel</strong> to drop in new widgets from the palette. Edit each tile from its <em>Edit</em> link.</p>
+  </details>
 
   <% panels = @dashboard.panels %>
 

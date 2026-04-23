@@ -1,3 +1,5 @@
 <% content_for :title, "New Panel" %>
+<%= link_to "← Back to dashboard", dashboard_path(@dashboard.slug),
+      class: "tiler-link", data: { tiler_back: "" } %>
 <h1>New Panel → <%= @dashboard.name %></h1>
 <%= render "form", panel: @panel %>
