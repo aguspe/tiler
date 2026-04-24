@@ -1,4 +1,6 @@
-# Tiler
+<p align="left">
+  <img src="app/assets/images/tiler/logo.svg" alt="Tiler" width="280">
+</p>
 
 Plug-and-play dashboards for Rails. Configurable widgets, JSON data sources, webhook ingestion, Turbo-powered live panels. Inspired by [Smashing](https://github.com/Smashing/smashing).
 
