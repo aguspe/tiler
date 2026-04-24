@@ -13,7 +13,10 @@ module Tiler
     # which happens during a Dashboard.destroy cascade: after_destroy_commit fires AFTER
     # the transaction, by which point the parent dashboard row is gone and
     # `panel.dashboard` is nil. Wiring the callbacks ourselves lets us guard that case.
-    after_create_commit  -> { broadcast_append_later_to(dashboard)  if dashboard }
+    # Only broadcast updates + destroys. Creation already streams synchronously
+    # via panels#create's turbo_stream response (see create.turbo_stream.erb);
+    # broadcasting on create too produced a duplicate tile in the originating
+    # browser. Other tabs/users get new panels on next dashboard navigation.
     after_update_commit  -> { broadcast_replace_later_to(dashboard) if dashboard }
     after_destroy_commit -> { broadcast_remove_to(dashboard)        if dashboard }
 

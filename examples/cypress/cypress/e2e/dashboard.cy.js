@@ -1,43 +1,41 @@
 /// <reference types="cypress" />
+//
+// Tiler dashboard — Cypress example.
+//
+// Three small, copy-pastable patterns for driving a Tiler dashboard from a
+// Cypress suite in your own app. They are not exhaustive tests of Tiler
+// itself — see this repo's `test/system/*` for that.
+//
+// Setup is in the README: install Tiler in your Rails app, seed the demo
+// dashboard, run the server, then point CYPRESS_BASE_URL at it.
 
 const slug = Cypress.env("dashboardSlug");
 
 describe("Tiler dashboard", () => {
   beforeEach(() => {
     cy.visit(`/tiler/dashboards/${slug}`);
+    // Every Tiler dashboard mounts a single .tiler-grid-stack container.
     cy.get(".tiler-grid-stack").should("exist");
   });
 
-  it("renders the grid with at least one panel", () => {
-    cy.get(".grid-stack-item").should("have.length.at.least", 1);
+  it("dashboard renders at least one panel", () => {
+    // Each persisted panel is a .grid-stack-item carrying gs-id="<panel.id>".
+    cy.get(".grid-stack-item[gs-id]").should("have.length.at.least", 1);
   });
 
-  it("renders the clock widget with a current time", () => {
-    cy.get(".tiler-clock-time").should("be.visible").invoke("text").should("match", /\d{1,2}:\d{2}:\d{2}/);
+  it("clock widget shows the current time", () => {
+    // Widget partials emit class hooks like .tiler-clock-time / .tiler-metric-value.
+    // Use those instead of structural selectors — they're stable across releases.
+    cy.get(".tiler-clock-time").invoke("text").should("match", /\d{1,2}:\d{2}:\d{2}/);
   });
 
-  it("drives a panel move via the gridstack JS API; PATCH layout fires", () => {
-    cy.intercept("PATCH", `/tiler/dashboards/${slug}/layout`).as("layoutPatch");
-
-    cy.get("[data-tiler-toggle-edit]").click();
-    cy.get(".grid-stack-item[gs-id]").first().invoke("attr", "gs-id").then((panelId) => {
-      cy.window().then((win) => {
-        const grid = win.document.querySelector(".grid-stack").gridstack;
-        const node = grid.engine.nodes.find((n) => n.el.getAttribute("gs-id") === String(panelId));
-        grid.update(node.el, { x: 4, y: 8 });
-      });
-
-      cy.wait("@layoutPatch").its("response.statusCode").should("eq", 200);
-
-      cy.get(`.grid-stack-item[gs-id='${panelId}']`)
-        .should("have.attr", "gs-x", "4")
-        .and("have.attr", "gs-y", "8");
-
-      // Reload — coords persisted by the server should survive.
-      cy.reload();
-      cy.get(`.grid-stack-item[gs-id='${panelId}']`)
-        .should("have.attr", "gs-x", "4")
-        .and("have.attr", "gs-y", "8");
+  it("clicking a panel header opens the in-page edit drawer", () => {
+    // Tiler edits panels in a slide-over drawer (no full-page nav). Click
+    // anywhere on the panel header to open it; the drawer adds .is-open.
+    cy.url().then((startUrl) => {
+      cy.get("[data-tiler-panel-header]").first().click();
+      cy.get("[data-tiler-drawer].is-open").should("exist");
+      cy.url().should("eq", startUrl);
     });
   });
 });

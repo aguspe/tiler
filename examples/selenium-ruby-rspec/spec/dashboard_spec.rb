@@ -1,54 +1,36 @@
 require_relative "spec_helper"
 
+# Tiler dashboard — Selenium + RSpec example.
+#
+# Three small, copy-pastable patterns for driving a Tiler dashboard from a
+# Selenium suite in your own app. They are not exhaustive tests of Tiler
+# itself — see this repo's `test/system/*` for that.
+#
+# Setup is in the README: install Tiler in your Rails app, seed the demo
+# dashboard, run the server, then point TILER_BASE_URL at it.
 RSpec.describe "Tiler dashboard" do
-  it "renders the grid with at least one panel" do
+  it "dashboard renders at least one panel" do
     visit_dashboard
-
-    @wait.until { @driver.find_element(css: ".grid-stack-item") }
-    panels = @driver.find_elements(css: ".grid-stack-item")
-    expect(panels.length).to be >= 1
-  end
-
-  it "renders the clock widget with a current time" do
-    visit_dashboard
-
-    # Clock is one of the seeded panels in the dummy app.
-    clock_time = @wait.until { @driver.find_element(css: ".tiler-clock-time") }
-    # Format is HH:MM:SS (24h) or H:MM:SS AM/PM (12h)
-    expect(clock_time.text).to match(/\d{1,2}:\d{2}:\d{2}/)
-  end
-
-  it "drives a panel move via the gridstack JS API and persists via PATCH" do
-    visit_dashboard
-
-    # Wait for at least one tile, then enter edit mode.
+    # Each persisted panel becomes a .grid-stack-item carrying gs-id="<panel.id>".
     @wait.until { @driver.find_element(css: ".grid-stack-item[gs-id]") }
-    @driver.find_element(css: "[data-tiler-toggle-edit]").click
+    expect(@driver.find_elements(css: ".grid-stack-item[gs-id]").length).to be >= 1
+  end
 
-    # Capture the first panel's id; move it to a non-overlapping slot.
-    panel_id = @driver.find_element(css: ".grid-stack-item[gs-id]").attribute("gs-id")
-    new_x, new_y = 4, 8
+  it "clock widget shows the current time" do
+    visit_dashboard
+    # Widget partials emit class hooks like .tiler-clock-time / .tiler-metric-value.
+    # Use those instead of structural selectors — they're stable across releases.
+    clock = @wait.until { @driver.find_element(css: ".tiler-clock-time") }
+    expect(clock.text).to match(/\d{1,2}:\d{2}:\d{2}/)
+  end
 
-    @driver.execute_script(<<~JS, panel_id, new_x, new_y)
-      const id = arguments[0];
-      const x  = arguments[1];
-      const y  = arguments[2];
-      const grid = document.querySelector('.grid-stack').gridstack;
-      const node = grid.engine.nodes.find(n => n.el.getAttribute('gs-id') == String(id));
-      grid.update(node.el, { x: x, y: y });
-    JS
-
-    # Poll the DOM (gs-x / gs-y reflect the persisted state once gridstack updates).
-    @wait.until do
-      el = @driver.find_element(css: ".grid-stack-item[gs-id='#{panel_id}']")
-      el.attribute("gs-x") == new_x.to_s && el.attribute("gs-y") == new_y.to_s
-    end
-
-    # Reload the page; if PATCH layout fired and persisted, the new coords survive.
-    @driver.navigate.refresh
-    @wait.until { @driver.find_element(css: ".grid-stack-item[gs-id='#{panel_id}']") }
-    el = @driver.find_element(css: ".grid-stack-item[gs-id='#{panel_id}']")
-    expect(el.attribute("gs-x")).to eq new_x.to_s
-    expect(el.attribute("gs-y")).to eq new_y.to_s
+  it "clicking a panel header opens the in-page edit drawer" do
+    visit_dashboard
+    # Tiler edits panels in a slide-over drawer (no full-page nav). Click
+    # anywhere on the panel header to open it; the drawer adds .is-open.
+    start_url = @driver.current_url
+    @wait.until { @driver.find_element(css: "[data-tiler-panel-header]") }.click
+    @wait.until { @driver.find_element(css: "[data-tiler-drawer].is-open") }
+    expect(@driver.current_url).to eq(start_url)
   end
 end

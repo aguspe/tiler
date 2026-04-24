@@ -194,9 +194,13 @@ export default class extends Controller {
     // Drop-over-existing semantics: replace the underlying panel(s).
     const replacedIds = this._panelsOverlapping(newNode.el, newNode)
 
-    // Remove the gridstack placeholder — the turbo_stream response appends
-    // the real tile bound to the persisted panel record.
-    this.grid.removeWidget(newNode.el, false, false)
+    // Remove the gridstack placeholder AND its DOM node — gridstack v10's
+    // setupDragIn with helper:'clone' leaves the cloned palette element in
+    // the grid; passing removeDOM=false used to render a ghost tile next to
+    // the real one streamed back from the controller. Second arg is
+    // removeDOM (true), third is triggerEvent (false — we don't want to
+    // re-fire change for a removal that is purely cosmetic).
+    this.grid.removeWidget(newNode.el, true, false)
     this._draggedWidget = null
 
     // Delete any panels we're replacing, then create the new one.

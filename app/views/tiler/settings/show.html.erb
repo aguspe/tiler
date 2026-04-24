@@ -71,7 +71,9 @@
 <section class="tiler-settings-section">
   <h2 class="t-h2">Custom widgets</h2>
   <p class="tiler-muted">Define your own widgets with a Liquid template — no Ruby required. They show up in the Add Panel palette like the built-ins.</p>
-  <%= link_to "Manage custom widgets →", user_widgets_path, class: "tiler-btn" %>
+  <div class="tiler-settings-section-actions">
+    <%= link_to "Manage custom widgets →", user_widgets_path, class: "tiler-btn" %>
+  </div>
 </section>
 
 <section class="tiler-settings-section">

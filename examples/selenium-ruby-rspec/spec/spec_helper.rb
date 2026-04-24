@@ -1,7 +1,7 @@
 require "selenium-webdriver"
 require "rspec"
 
-TILER_BASE_URL       = ENV.fetch("TILER_BASE_URL",       "http://127.0.0.1:3131")
+TILER_BASE_URL       = ENV.fetch("TILER_BASE_URL",       "http://127.0.0.1:3000")
 TILER_DASHBOARD_SLUG = ENV.fetch("TILER_DASHBOARD_SLUG", "demo")
 
 RSpec.configure do |config|

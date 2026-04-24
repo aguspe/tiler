@@ -40,7 +40,7 @@ module Tiler
     test "table widget with _preview config renders the static data" do
       preview = {
         "_preview" => {
-          "rows"    => [["ok", 142.3], ["err", 88.0]],
+          "rows"    => [ [ "ok", 142.3 ], [ "err", 88.0 ] ],
           "columns" => %w[status duration],
           "total"   => 2
         }

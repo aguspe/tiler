@@ -20,9 +20,24 @@ module Tiler
       assert_selector "a", text: /custom widgets/i, wait: 5
     end
 
+    test "clicking a row navigates to its edit page; the action cell does not double-fire" do
+      Tiler::UserWidget.create!(slug: "row_click", label: "Row Click",
+                                template: "x", data_kind: "config_only")
+      visit user_widgets_path
+      find("[data-tiler-user-widget-row='row_click']", wait: 5).click
+      uw = Tiler::UserWidget.find_by(slug: "row_click")
+      assert_current_path edit_user_widget_path(uw)
+      # Edit button in the actions cell still routes correctly (skip-zone works).
+      visit user_widgets_path
+      within("[data-tiler-user-widget-row='row_click']") do
+        click_on "Edit"
+      end
+      assert_current_path edit_user_widget_path(uw)
+    end
+
     test "creating a custom widget makes it show up in the dashboard palette" do
       visit user_widgets_path
-      click_on "New custom widget"
+      click_on "+ New custom widget"
       fill_in "Slug",  with: "smoke_test"
       fill_in "Label", with: "Smoke Test"
       # Default template seed is fine; just submit.

@@ -69,14 +69,7 @@
 
   <% panels = @dashboard.panels %>
 
-  <% if panels.empty? %>
-    <div class="tiler-empty">
-      <p>No panels yet.</p>
-      <%= link_to "Add your first panel", new_dashboard_panel_path(@dashboard),
-            class: "tiler-btn tiler-btn-primary" %>
-    </div>
-  <% else %>
-    <div class="tiler-dashboard-shell" data-tiler--dashboard-grid-target="shell">
+  <div class="tiler-dashboard-shell" data-tiler--dashboard-grid-target="shell">
       <aside class="tiler-widget-palette" data-tiler-palette aria-label="Widget palette">
         <h4 class="tiler-widget-palette-title">Widgets</h4>
         <div class="tiler-widget-palette-list" role="list">
@@ -110,6 +103,12 @@
            <% if @dashboard.refresh_seconds > 0 %>
              data-tiler-refresh="<%= @dashboard.refresh_seconds %>"
            <% end %>>
+        <% if panels.empty? %>
+          <div class="tiler-empty-grid-overlay" data-tiler-empty-grid aria-hidden="true">
+            <h2>No tiles yet</h2>
+            <p>Click <strong>Add Panel</strong> above, then <strong>drag a widget</strong> here.</p>
+          </div>
+        <% end %>
         <% panels.each do |panel| %>
           <% pwk    = Tiler.widgets[panel.widget_type] %>
           <% pmin   = (pwk&.min_size || { w: 1, h: 1 }) %>
@@ -142,6 +141,5 @@
         <% end %>
       </div>
     </div>
-  <% end %>
 </div>
 </div>

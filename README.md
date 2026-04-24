@@ -47,6 +47,26 @@ To load a demo dashboard:
 bin/rails tiler:seed
 ```
 
+## Presets
+
+Tiler ships with three pre-built dashboards. Each one creates the data
+sources, the dashboard, every panel, and a small batch of sample records
+so the visualizations have something to render. All idempotent — safe to
+re-run.
+
+```bash
+bin/rails tiler:preset                     # list available presets
+bin/rails tiler:preset:default             # generic, every widget on one grid → /tiler/dashboards/demo
+bin/rails tiler:preset:test_automation     # CI/QA cockpit (Allure-style)   → /tiler/dashboards/test_automation
+bin/rails tiler:preset:commerce            # online-shop ops dashboard      → /tiler/dashboards/commerce
+```
+
+| Preset | What it shows | Push your own data to |
+|---|---|---|
+| **default** | Every built-in widget on one grid (clock, metric, charts, list, meter, comments, …) | `/tiler/ingest/demo_requests` |
+| **test_automation** | Total runs, failure delta, avg duration, status breakdown, per-suite status grid, top failing tests, failures by suite | `/tiler/ingest/test_runs` |
+| **commerce** | Revenue today, orders today, AOV, items-per-order meter, 30-day revenue trend, orders-by-status pie, top products, channel performance, recent orders | `/tiler/ingest/orders`, `/tiler/ingest/sessions` |
+
 ## Configure
 
 `config/initializers/tiler.rb` is written by the install generator:
