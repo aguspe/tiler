@@ -1,0 +1,89 @@
+<%= form_with(model: user_widget, url: (user_widget.persisted? ? user_widget_path(user_widget) : user_widgets_path),
+              local: true, data: { turbo: false }, class: "tiler-form") do |f| %>
+  <% if user_widget.errors.any? %>
+    <div class="tiler-form-errors">
+      <ul><% user_widget.errors.full_messages.each do |m| %><li><%= m %></li><% end %></ul>
+    </div>
+  <% end %>
+
+  <div class="tiler-field">
+    <%= f.label :slug %>
+    <%= f.text_field :slug, required: true, placeholder: "weather", pattern: "[a-z][a-z0-9_]{2,39}" %>
+    <p class="tiler-hint">Lowercase a-z, 0-9, _ — 3 to 40 chars. Registered as <code>user_&lt;slug&gt;</code>.</p>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :label %>
+    <%= f.text_field :label, required: true, placeholder: "Weather" %>
+  </div>
+
+  <div class="tiler-field-row">
+    <div class="tiler-field">
+      <%= f.label :default_w, "Default width (1-12)" %>
+      <%= f.number_field :default_w, min: 1, max: 12 %>
+    </div>
+    <div class="tiler-field">
+      <%= f.label :default_h, "Default height (1-12)" %>
+      <%= f.number_field :default_h, min: 1, max: 12 %>
+    </div>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :data_kind, "Data" %>
+    <%= f.select :data_kind, Tiler::UserWidget::DATA_KINDS.map { |k| [ k.humanize, k ] } %>
+    <p class="tiler-hint"><strong>config_only</strong>: pulls only from <code>panel.config</code>. <strong>query</strong>: aggregates payloads from a data source (define below).</p>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :query_definition, "Query (JSON)" %>
+    <%= f.text_area :query_definition, rows: 4,
+          placeholder: '{"source_slug":"my_source","value_column":"value","aggregation":"sum","time_window":"24h","group_by":"status"}' %>
+    <p class="tiler-hint">Required when data is <code>query</code>. Aggregation: count/sum/avg/min/max/last. <code>group_by</code> returns <code>data.items</code> instead of <code>data.value</code>.</p>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :default_config, "Default config (JSON)" %>
+    <%= f.text_area :default_config, rows: 3, placeholder: "{}" %>
+  </div>
+
+  <div class="tiler-field">
+    <%= f.label :template, "Liquid template" %>
+    <%= f.text_area :template, rows: 14, required: true, data: { tiler_user_widget_template: "" } %>
+    <p class="tiler-hint">
+      Available variables: <code>data</code>, <code>panel</code>, <code>config</code>.
+      Liquid filters work (<code>| default: "—"</code>, <code>| times: 100</code>, etc.). No Ruby execution.
+    </p>
+  </div>
+
+  <details class="tiler-info">
+    <summary>Live preview (against sample JSON)</summary>
+    <div class="tiler-field">
+      <%= label_tag :sample_data, "Sample data (JSON)" %>
+      <%= text_area_tag :sample_data, '{"value": 42}', rows: 3, data: { tiler_user_widget_sample: "" } %>
+    </div>
+    <button type="button"
+            class="tiler-btn"
+            data-tiler-user-widget-preview-btn
+            data-controller="tiler--user-widget-preview"
+            data-tiler--user-widget-preview-url-value="<%= preview_user_widgets_path %>"
+            data-tiler--user-widget-preview-csrf-value="<%= form_authenticity_token %>"
+            data-action="click->tiler--user-widget-preview#run">Preview</button>
+    <div class="tiler-preview" data-tiler-user-widget-preview-output></div>
+  </details>
+
+  <div class="tiler-form-actions">
+    <button type="submit" class="tiler-btn tiler-btn-primary">
+      <%= user_widget.persisted? ? "Update widget" : "Create widget" %>
+    </button>
+    <% if user_widget.persisted? %>
+      <button type="button"
+              class="tiler-btn tiler-btn-danger"
+              data-controller="tiler--modal"
+              data-action="click->tiler--modal#open"
+              data-tiler--modal-message-value="Delete '<%= user_widget.slug %>'?"
+              data-tiler--modal-confirm-label-value="Delete widget"
+              data-tiler--modal-action-value="<%= user_widget_path(user_widget) %>"
+              data-tiler--modal-method-value="delete">Delete</button>
+    <% end %>
+  </div>
+<% end %>

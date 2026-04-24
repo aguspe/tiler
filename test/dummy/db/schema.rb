@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_23_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_24_000000) do
   create_table "tiler_dashboards", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -65,6 +65,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_120000) do
     t.index ["tiler_dashboard_id", "y", "x"], name: "index_tiler_panels_on_tiler_dashboard_id_and_y_and_x"
     t.index ["tiler_dashboard_id"], name: "index_tiler_panels_on_tiler_dashboard_id"
     t.index ["tiler_data_source_id"], name: "index_tiler_panels_on_tiler_data_source_id"
+  end
+
+  create_table "tiler_user_widgets", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "data_kind", default: "config_only", null: false
+    t.text "default_config"
+    t.integer "default_h", default: 3, null: false
+    t.integer "default_w", default: 4, null: false
+    t.string "label", null: false
+    t.text "query_definition"
+    t.string "slug", null: false
+    t.text "template", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_tiler_user_widgets_on_slug", unique: true
   end
 
   add_foreign_key "tiler_data_records", "tiler_data_sources"

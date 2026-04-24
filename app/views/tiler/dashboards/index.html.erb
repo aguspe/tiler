@@ -12,7 +12,18 @@
 <% else %>
   <ul class="tiler-card-grid">
     <% @dashboards.each do |d| %>
-      <li class="tiler-card">
+      <li class="tiler-card tiler-card-deletable" data-tiler-dashboard-card="<%= d.slug %>">
+        <button type="button"
+                class="tiler-card-delete"
+                aria-label="Delete <%= d.name %>"
+                title="Delete dashboard"
+                data-tiler-dashboard-delete
+                data-controller="tiler--modal"
+                data-action="click->tiler--modal#open"
+                data-tiler--modal-message-value="Delete &quot;<%= d.name %>&quot;? This removes the dashboard and all its panels — cannot be undone."
+                data-tiler--modal-confirm-label-value="Delete dashboard"
+                data-tiler--modal-action-value="<%= dashboard_path(d) %>"
+                data-tiler--modal-method-value="delete">×</button>
         <h3><%= link_to d.name, dashboard_path(d) %></h3>
         <p class="tiler-muted"><%= d.description %></p>
         <p class="tiler-meta"><%= pluralize(d.panels.size, "panel") %></p>

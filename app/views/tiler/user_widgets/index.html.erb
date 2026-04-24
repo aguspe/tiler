@@ -1,0 +1,49 @@
+<% content_for :title, "Custom widgets" %>
+<%= link_to "← Back to Settings", settings_path, class: "tiler-link" %>
+<h1>Custom widgets</h1>
+<p class="tiler-muted">No-code widgets defined with a Liquid template. Auto-registered on save.</p>
+
+<div class="tiler-page-header-actions">
+  <%= link_to "New custom widget", new_user_widget_path, class: "tiler-btn tiler-btn-primary" %>
+</div>
+
+<% if @user_widgets.empty? %>
+  <div class="tiler-empty">
+    <p>No custom widgets yet.</p>
+  </div>
+<% else %>
+  <table class="tiler-table">
+    <thead>
+      <tr>
+        <th>Slug</th>
+        <th>Label</th>
+        <th>Data</th>
+        <th>Default size</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @user_widgets.each do |uw| %>
+        <tr data-tiler-user-widget-row="<%= uw.slug %>">
+          <td><code><%= uw.registry_slug %></code></td>
+          <td><%= uw.label %></td>
+          <td><%= uw.data_kind.humanize %></td>
+          <td><%= uw.default_w %>×<%= uw.default_h %></td>
+          <td>
+            <%= link_to "Edit", edit_user_widget_path(uw), class: "tiler-link" %>
+            &nbsp;
+            <button type="button"
+                    class="tiler-link"
+                    data-tiler-user-widget-delete
+                    data-controller="tiler--modal"
+                    data-action="click->tiler--modal#open"
+                    data-tiler--modal-message-value="Delete custom widget '<%= uw.slug %>'? Existing panels using it will show 'no longer exists'."
+                    data-tiler--modal-confirm-label-value="Delete widget"
+                    data-tiler--modal-action-value="<%= user_widget_path(uw) %>"
+                    data-tiler--modal-method-value="delete">Delete</button>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

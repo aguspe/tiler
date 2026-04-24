@@ -20,12 +20,19 @@ module Tiler
 
       def show_next_steps
         say "\nWidget scaffolded.", :green
-        say "\nRegister it in config/initializers/tiler.rb:"
-        say <<~RUBY, :cyan
+        say <<~MSG, :cyan
+          Files:
+            app/widgets/tiler/#{file_name}_widget.rb
+            app/views/tiler/widgets/_#{file_name}.html.erb
 
-          Tiler.register_widget(:#{file_name},
-            klass: ::Tiler::#{class_name}Widget)
-        RUBY
+          The widget self-registers on boot — no initializer edit needed.
+          Tiler eager-loads everything under app/widgets/** at startup and
+          re-loads on dev change.
+
+          Try it: bin/rails server, then Add Panel -> "#{class_name.titleize}".
+
+          Distributing as a gem? See WIDGETS.md "Packaging widgets as gems".
+        MSG
       end
 
       private

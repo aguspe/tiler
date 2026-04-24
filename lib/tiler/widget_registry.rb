@@ -16,6 +16,12 @@ module Tiler
       @widgets[type.to_s]
     end
 
+    # Drop a widget from the registry. Used by Tiler::UserWidget when a
+    # no-code widget row is destroyed.
+    def unregister(type)
+      @widgets.delete(type.to_s)
+    end
+
     def fetch(type)
       @widgets.fetch(type.to_s) { raise Error, "Unknown widget type: #{type}" }
     end

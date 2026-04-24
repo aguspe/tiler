@@ -1,0 +1,4 @@
+<% content_for :title, "Edit custom widget" %>
+<%= link_to "← Back", user_widgets_path, class: "tiler-link" %>
+<h1>Edit <%= @user_widget.slug %></h1>
+<%= render "form", user_widget: @user_widget %>

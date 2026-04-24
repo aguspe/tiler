@@ -24,4 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rails", ">= 7.1"
   spec.add_dependency "turbo-rails", ">= 2.0"
   spec.add_dependency "stimulus-rails", ">= 1.3"
+  # Liquid powers no-code "user-defined widgets" — sandboxed templating with
+  # no Ruby execution and a curated filter set.
+  spec.add_dependency "liquid", ">= 5.0"
 end

@@ -4,11 +4,21 @@ Plug-and-play dashboards for Rails. Configurable widgets, JSON data sources, web
 
 ## Features
 
-- 📊 **6 built-in widgets**: metric, table, line chart, bar chart, pie chart, status grid
-- 🔌 **Widget registry**: plug in your own widgets from the host app
+- 📊 **14 built-in widgets**: metric, number-with-delta (sparkline), meter, clock, text, status grid, comments, list, table, line / bar / pie charts, image, iframe
+- 🔌 **Widget registry, three ways**:
+  - drop a Ruby class in `app/widgets/` (auto-loaded + dev-reloaded)
+  - publish a Ruby gem that registers on its own railtie
+  - **no-code**: define widgets through Settings using a sandboxed Liquid template
+- 🎨 **Per-dashboard theme**: 4 token overrides (page / tile / tile header / gutter) shown live via inline CSS custom properties
+- 🖍️ **Per-panel color override**: charts read `palette` (array) or `color` (single) from `panel.config`; line charts also accept per-series colors
+- 🪟 **Drag, resize, drop**: gridstack-driven layout (1–12 col grid), full edge + corner resize, palette → drop creates panels, click any tile header to edit in a slide-over drawer
+- ✏️ **Inline rename**: double-click the dashboard title to edit it in place; Esc to cancel
+- 🗑️ **Hover-to-delete**: each dashboard card shows a × on hover with a confirm modal
 - 🗄️ **Schemaless data sources**: JSON payloads, schema is descriptive not enforced
 - 📥 **Multi-channel ingestion**: webhook (HMAC-style token), manual entry, CSV import
-- ⚡ **Turbo Frames**: lazy-loaded panels, optional auto-refresh
+- ⚡ **Turbo Frames**: lazy-loaded panels, optional auto-refresh, drawer-based editing
+- 📺 **TV mode**: per-dashboard toggle that hides chrome — wall-mount friendly
+- 📱 **Mobile responsive**: gridstack collapses to one column under 720px; drawer fills viewport
 - 🔐 **Plug into your auth**: inherits from your `ApplicationController`, configurable `authorize_view` / `authorize_manage` lambdas
 - 💎 **Mountable Rails engine**: one install generator, mount anywhere
 
@@ -50,32 +60,40 @@ Tiler.configure do |config|
 end
 ```
 
-## Register a custom widget
+## Custom widgets
 
-```ruby
-# config/initializers/tiler.rb
-Tiler.register_widget(:sparkline,
-  label:   "Sparkline",
-  partial: "my_app/widgets/sparkline",
-  query:   MyApp::Widgets::SparklineQuery)
+Three paths, depending on your audience.
+
+### 1. Ruby (host app) — preferred for engineers
+
+```bash
+bin/rails generate tiler:widget weather
 ```
 
-A query class subclasses `Tiler::Query::Base` and returns a hash consumed by the partial:
+Creates a self-registering Widget + Query class + partial. The engine eager-loads everything under `app/widgets/**` on boot and re-loads on dev change — no initializer edit needed. Open Settings → Add Panel → **Weather**.
 
-```ruby
-class MyApp::Widgets::SparklineQuery < Tiler::Query::Base
-  def call
-    { points: base_scope.pluck(:recorded_at, Arel.sql(json_extract("value"))) }
-  end
-end
+Full reference: [`WIDGETS.md`](./WIDGETS.md) — class attrs, query helpers, partial locals, `empty?` rules, color-override hooks, `example_*` fixtures, packaging widgets as gems.
+
+### 2. Gem-pack — preferred for community widgets
+
+```bash
+bundle gem tiler-weather
 ```
 
-The partial renders with `panel:` and `data:` locals:
+Inside the gem's railtie, require + register your widget files. Host apps install with `bundle add tiler-weather` — nothing else. See "Packaging widgets as gems" in `WIDGETS.md`.
 
-```erb
-<!-- app/views/my_app/widgets/_sparkline.html.erb -->
-<svg>...</svg>
+### 3. No-code (Liquid) — for non-engineers
+
+Settings → **Custom widgets** → **New custom widget**. Define a slug, label, optional query (data source + aggregation), and a Liquid template. Saved widgets auto-register under `user_<slug>` and show up immediately in the Add Panel palette.
+
+```liquid
+<div class="tiler-metric">
+  <div class="tiler-metric-value">{{ data.value | default: "—" }}</div>
+  <div class="tiler-metric-label">{{ panel.title }}</div>
+</div>
 ```
+
+Liquid is sandboxed (no Ruby execution, no `{% include %}`); `query_definition` only allows whitelisted aggregations (`count`/`sum`/`avg`/`min`/`max`/`last`) against existing data sources. Live preview is built into the form.
 
 ## Ingest data via webhook
 
@@ -90,14 +108,28 @@ curl -X POST https://your-app.com/tiler/ingest/my_source \
 
 Send a JSON object (one record) or a JSON array (batch).
 
+## Per-dashboard theme + per-panel colors
+
+**Settings → Theme** exposes 4 color pickers per dashboard. Each maps to a CSS custom property that's emitted as inline style on `.tiler-dashboard`, so descendants inherit:
+
+| Setting          | Token         | Paints                                |
+| ---------------- | ------------- | ------------------------------------- |
+| `page_bg`        | `--paper`     | Page background                       |
+| `tile_bg`        | `--paper-2`   | Tile / panel surface                  |
+| `tile_header_bg` | `--paper-3`   | Tile header strip + tags + hover bg   |
+| `gutter_bg`      | `--border`    | Grid gutters between tiles            |
+
+Per-panel chart color (visible on the edit form for opt-in widgets): `panel.config["color"]` (single hex) and/or `panel.config["palette"]` (array of hex). Line charts also accept `color` per `series` entry. Sanitization rejects anything that isn't `#rgb` / `#rrggbb` / `#rrggbbaa` silently.
+
 ## Model overview
 
-- `Tiler::Dashboard` — `has_many :panels`
-- `Tiler::Panel` — `widget_type`, `col_span`, `config` (JSON), `belongs_to :data_source`
+- `Tiler::Dashboard` — `has_many :panels`, JSON `settings` (theme + tv_mode)
+- `Tiler::Panel` — `widget_type`, `width`/`height`/`x`/`y`, `config` (JSON), `belongs_to :data_source`
 - `Tiler::DataSource` — `schema_definition`, `ingestion_methods`, `webhook_token`
 - `Tiler::DataRecord` — `payload` (JSON), `recorded_at`, `ingested_via`
+- `Tiler::UserWidget` — runtime no-code widget definitions (Liquid template + safe query JSON)
 
-All four are scoped under the `tiler_` table prefix to avoid colliding with host models.
+All scoped under the `tiler_` table prefix to avoid colliding with host models.
 
 ## Extending
 

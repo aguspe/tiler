@@ -7,8 +7,8 @@
 <p class="tiler-muted">Per-dashboard preferences. Changes save instantly via the Tiler API.</p>
 
 <section class="tiler-settings-section">
-  <h2 class="t-h2">Personalization</h2>
-  <p class="tiler-muted">Pick a background color and a logo URL (PNG / JPG / SVG hosted over HTTPS) shown on each dashboard.</p>
+  <h2 class="t-h2">Theme</h2>
+  <p class="tiler-muted">Tint the page, tiles, tile headers, and the gutters between tiles. Reset to fall back to the design-system defaults. Want a logo? Drop in an Image widget instead.</p>
 
   <% if @dashboards.empty? %>
     <p class="tiler-muted">No dashboards yet. <%= link_to "Create one", new_dashboard_path, class: "tiler-link" %>.</p>
@@ -54,18 +54,6 @@
                        data-action="input->tiler--settings-input#change">
               </label>
             <% end %>
-            <label class="tiler-field-inline tiler-field-inline-stretch">
-              <span>Logo URL (https)</span>
-              <input type="url"
-                     placeholder="https://example.com/logo.png"
-                     value="<%= dash.logo_url %>"
-                     data-tiler-logo-url
-                     data-controller="tiler--settings-input"
-                     data-tiler--settings-input-url-value="<%= url %>"
-                     data-tiler--settings-input-csrf-value="<%= form_authenticity_token %>"
-                     data-tiler--settings-input-key-value="logo_url"
-                     data-action="input->tiler--settings-input#change">
-            </label>
             <button type="button"
                     class="tiler-btn tiler-btn-sm"
                     data-tiler-reset-theme
@@ -78,6 +66,12 @@
       <% end %>
     </ul>
   <% end %>
+</section>
+
+<section class="tiler-settings-section">
+  <h2 class="t-h2">Custom widgets</h2>
+  <p class="tiler-muted">Define your own widgets with a Liquid template — no Ruby required. They show up in the Add Panel palette like the built-ins.</p>
+  <%= link_to "Manage custom widgets →", user_widgets_path, class: "tiler-btn" %>
 </section>
 
 <section class="tiler-settings-section">

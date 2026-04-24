@@ -7,7 +7,15 @@ module Tiler
 
     # Real-time updates: broadcast panel CRUD events to the dashboard's Turbo Stream channel.
     # Host apps that opt in via <%= turbo_stream_from @dashboard %> get live updates without polling.
-    broadcasts_to ->(panel) { panel.dashboard }, inserts_by: :append
+    #
+    # We avoid `broadcasts_to ->(panel) { panel.dashboard }` because turbo-rails 2.0.23
+    # falls through to `send(stream)` (i.e. send(<Proc>)) when the lambda returns nil —
+    # which happens during a Dashboard.destroy cascade: after_destroy_commit fires AFTER
+    # the transaction, by which point the parent dashboard row is gone and
+    # `panel.dashboard` is nil. Wiring the callbacks ourselves lets us guard that case.
+    after_create_commit  -> { broadcast_append_later_to(dashboard)  if dashboard }
+    after_update_commit  -> { broadcast_replace_later_to(dashboard) if dashboard }
+    after_destroy_commit -> { broadcast_remove_to(dashboard)        if dashboard }
 
     validates :title,       presence: true
     validates :widget_type, presence: true

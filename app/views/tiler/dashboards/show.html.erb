@@ -25,14 +25,6 @@
   <%= turbo_stream_from @dashboard %>
   <% unless @tv_mode %>
     <div class="tiler-page-header">
-      <% if @dashboard.logo_url %>
-        <img class="tiler-page-header-logo"
-             src="<%= @dashboard.logo_url %>"
-             alt="<%= @dashboard.name %> logo"
-             data-tiler-dashboard-logo
-             referrerpolicy="no-referrer"
-             loading="lazy">
-      <% end %>
       <div>
         <h1 class="tiler-dashboard-title"
             data-tiler-dashboard-title

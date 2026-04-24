@@ -1,12 +1,18 @@
+require "tiler/widget"
+<% if options[:query] -%>
+require "tiler/query/base"
+<% end -%>
+
 module Tiler
 <% if options[:query] -%>
   class <%= class_name %>Query < ::Tiler::Query::Base
     def call
       # Return a Hash consumed by the partial as `data`.
-      # Use helpers from Tiler::Query::Base:
+      # Helpers from Tiler::Query::Base:
       #   base_scope          -> filtered ActiveRecord scope
-      #   aggregate(s, c, a)  -> run sum/avg/min/max/count/last
+      #   aggregate(s, c, a)  -> sum/avg/min/max/count/last
       #   distinct_values(c)  -> distinct payload values for a column
+      #   chart_colors        -> palette honoring per-panel color/palette config
       { value: base_scope.count }
     end
   end
@@ -22,8 +28,26 @@ module Tiler
     self.query_class = nil
 
     def data
-      { }   # populate from panel.config as needed
+      {} # populate from panel.config as needed
     end
 <% end -%>
+    self.default_config = {}
+    self.default_size   = { w: 4, h: 3 }
+    self.min_size       = { w: 1, h: 1 }
+    self.max_size       = { w: 12, h: 12 }
+
+    # Optional: pasted into Config to render without a data source.
+    # def self.example_preview
+    #   { value: 42 }
+    # end
+
+    # Optional: opt this widget into the per-panel color picker.
+    # def self.supports_color_config?;   true; end
+    # def self.supports_palette_config?; true; end
   end
 end
+
+# The engine eager-loads every file in app/widgets/** on boot; this call adds
+# the widget to the global registry under its type slug.
+::Tiler.widgets.register("<%= file_name %>",
+  klass: ::Tiler::<%= class_name %>Widget)

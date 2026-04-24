@@ -11,6 +11,13 @@ Tiler::Engine.routes.draw do
   resources :data_sources, only: [ :index, :show, :new, :create, :edit, :update, :destroy ], param: :id
 
   get "/settings", to: "settings#show", as: :settings
+  resources :user_widgets, path: "settings/user_widgets",
+                          only: [ :index, :new, :create, :edit, :update, :destroy ],
+                          param: :id do
+    collection do
+      post :preview
+    end
+  end
 
   post "/ingest/:source_slug", to: "ingest#create", as: :ingest
 

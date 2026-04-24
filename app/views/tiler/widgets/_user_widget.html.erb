@@ -1,0 +1,15 @@
+<%
+  # Looks up the matching Tiler::UserWidget row by the registry slug stripped
+  # of its "user_" prefix and renders the row's Liquid template against the
+  # widget's `data` hash. The slug is stable for the lifetime of the row.
+  registry_slug = panel.widget.class.type
+  user_slug     = registry_slug.to_s.sub(/\Auser_/, "")
+  user_widget   = Tiler::UserWidget.find_by(slug: user_slug)
+%>
+<% if user_widget.nil? %>
+  <p class="tiler-muted">User widget <code><%= user_slug %></code> no longer exists.</p>
+<% else %>
+  <div class="tiler-user-widget" data-tiler-user-widget="<%= user_slug %>">
+    <%= user_widget.render_template(panel: panel, data: data).html_safe %>
+  </div>
+<% end %>

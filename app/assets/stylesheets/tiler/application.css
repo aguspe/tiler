@@ -22,8 +22,9 @@ body { font-family: var(--font-body); margin: 0; color: var(--ink); background: 
 .tiler-btn:active { transform: translateY(1px); }
 .tiler-btn-primary { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); }
 .tiler-btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
-.tiler-btn-danger  { background: var(--danger); color: var(--primary-ink); border-color: var(--danger); }
-.tiler-btn-danger:hover { filter: brightness(0.95); }
+.tiler-btn-danger  { background: var(--danger); color: #fff; border-color: var(--danger); }
+.tiler-btn-danger:hover { background: var(--danger-hover); border-color: var(--danger-hover); color: #fff; }
+.tiler-btn-danger:focus-visible { outline: 2px solid var(--danger-hover); outline-offset: 2px; }
 
 .tiler-link { color: var(--primary); text-decoration: none; font-size: var(--fs-caption); font-weight: var(--fw-medium); }
 .tiler-link:hover { color: var(--primary-hover); text-decoration: underline; }
@@ -35,8 +36,13 @@ body { font-family: var(--font-body); margin: 0; color: var(--ink); background: 
 .tiler-empty { text-align: center; padding: 3rem; background: var(--paper-2); border: 1px dashed var(--border-2); border-radius: var(--radius-md); color: var(--ink-3); }
 
 .tiler-card-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-.tiler-card { background: var(--paper-2); border-radius: var(--radius-md); padding: 18px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; transition: border-color var(--dur-fast) var(--ease-snap); }
+.tiler-card { background: var(--paper-2); border-radius: var(--radius-md); padding: 18px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; transition: border-color var(--dur-fast) var(--ease-snap); position: relative; }
 .tiler-card:hover { border-color: var(--border-2); }
+/* Hover-revealed delete affordance — × in the top-right corner. */
+.tiler-card-delete { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; padding: 0; border: 1px solid var(--border); background: var(--paper); color: var(--ink-3); font-size: 18px; line-height: 1; border-radius: 50%; cursor: pointer; opacity: 0; transition: opacity var(--dur-fast) var(--ease-snap), color var(--dur-fast) var(--ease-snap), border-color var(--dur-fast) var(--ease-snap); display: flex; align-items: center; justify-content: center; }
+.tiler-card:hover .tiler-card-delete,
+.tiler-card-delete:focus-visible { opacity: 1; }
+.tiler-card-delete:hover { color: var(--danger); border-color: var(--danger); }
 .tiler-card h3 { margin: 0; font-family: var(--font-display); font-weight: var(--fw-semi); font-size: 18px; color: var(--ink); }
 .tiler-card h3 a { color: var(--ink); text-decoration: none; }
 
@@ -182,8 +188,6 @@ body.tiler-tv .tiler-grid-stack { border: none; }
 .tiler-field-inline input[type="color"] { padding: 0; height: 32px; width: 48px; cursor: pointer; }
 .tiler-input-error  { border-color: var(--danger) !important; }
 .tiler-input-saved  { border-color: var(--success) !important; }
-/* Page-header logo (per-dashboard personalization) */
-.tiler-page-header-logo { max-height: 36px; max-width: 160px; width: auto; height: auto; object-fit: contain; }
 /* Per-widget color override row on the panel edit form */
 .tiler-color-overrides-row { display: flex; align-items: flex-end; gap: 0.75rem; flex-wrap: wrap; }
 /* Inline-editable dashboard title — double-click to rename. */

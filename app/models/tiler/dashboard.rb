@@ -67,15 +67,6 @@ module Tiler
       pairs.join(" ")
     end
 
-    # logo_url: http(s) URL only — rejected when scheme is anything else
-    # (javascript:, data:, file:, etc.) so we never render an unsafe <img src>.
-    def logo_url
-      u = settings_hash["logo_url"].to_s.strip
-      return nil if u.empty?
-      prefix = u[0, 8].downcase
-      (prefix.start_with?("http://") || prefix.start_with?("https://")) ? u : nil
-    end
-
     private
 
     def theme_color(key)
